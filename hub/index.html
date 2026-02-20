@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gratitude Agents — Team Hub</title>
+<meta name="description" content="14 Claude Code agents for marketing and design. Your team's AI-powered creative system.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #000;
+  color: rgba(255,255,255,0.80);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   BRAND TOKENS
+   ============================================================ */
+:root {
+  --pink: #FE3184;
+  --coral: #FF6B35;
+  --orange: #ec7211;
+  --gradient: linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%);
+  --bg-black: #000000;
+  --bg-elevated: #0a0a0a;
+  --bg-surface: #111111;
+  --bg-card: #141414;
+  --bg-card-hover: #1a1a1a;
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
+  --border-accent: rgba(254,49,132,0.3);
+  --text-100: rgba(255,255,255,1.0);
+  --text-80: rgba(255,255,255,0.80);
+  --text-60: rgba(255,255,255,0.60);
+  --text-50: rgba(255,255,255,0.50);
+  --text-40: rgba(255,255,255,0.40);
+  --shadow-glow: 0 0 60px rgba(254,49,132,0.08);
+  --shadow-card: 0 2px 20px rgba(0,0,0,0.4);
+  --shadow-card-hover: 0 8px 40px rgba(0,0,0,0.6), 0 0 60px rgba(254,49,132,0.06);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+section { padding: 80px 0; position: relative; }
+@media (min-width: 768px) { section { padding: 120px 0; } }
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+.font-display { font-family: 'Anton', sans-serif; font-weight: 400; text-transform: uppercase; letter-spacing: 0.02em; }
+.section-label {
+  font-size: 13px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--pink); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-label::before {
+  content: ''; width: 24px; height: 1px;
+  background: var(--gradient);
+}
+.section-title {
+  font-family: 'Anton', sans-serif; font-weight: 400; text-transform: uppercase;
+  font-size: clamp(32px, 5vw, 56px); color: var(--text-100);
+  line-height: 1.05; margin-bottom: 16px;
+}
+.section-subtitle {
+  font-size: 18px; color: var(--text-60); max-width: 640px; line-height: 1.65;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+}
+.hero-glow-1 {
+  position: absolute; width: 800px; height: 800px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(254,49,132,0.12) 0%, transparent 70%);
+  top: -200px; right: -200px; animation: float 12s ease-in-out infinite;
+}
+.hero-glow-2 {
+  position: absolute; width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(236,114,17,0.08) 0%, transparent 70%);
+  bottom: -100px; left: -100px; animation: float 15s ease-in-out infinite reverse;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.hero-content { position: relative; z-index: 1; text-align: center; padding: 0 24px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px;
+  background: rgba(254,49,132,0.08); border: 1px solid rgba(254,49,132,0.2);
+  border-radius: var(--radius-pill); font-size: 13px; font-weight: 600;
+  color: var(--pink); text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 32px;
+}
+.hero-badge .dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--pink);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+.hero-title {
+  font-family: 'Anton', sans-serif; font-weight: 400; text-transform: uppercase;
+  font-size: clamp(48px, 10vw, 120px); line-height: 0.95; color: var(--text-100);
+  margin-bottom: 24px;
+}
+.hero-title .gradient-text {
+  background: var(--gradient); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-subtitle {
+  font-size: clamp(16px, 2.5vw, 22px); color: var(--text-60); max-width: 600px;
+  margin: 0 auto 40px; line-height: 1.6;
+}
+.hero-stats {
+  display: flex; gap: 48px; justify-content: center; flex-wrap: wrap;
+}
+.hero-stat .number {
+  font-family: 'Anton', sans-serif; font-size: 48px; text-transform: uppercase;
+  background: var(--gradient); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1;
+}
+.hero-stat .label {
+  font-size: 13px; color: var(--text-40); text-transform: uppercase;
+  letter-spacing: 0.08em; font-weight: 500; margin-top: 4px;
+}
+.scroll-indicator {
+  position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--text-40); font-size: 12px; text-transform: uppercase;
+  letter-spacing: 0.1em; animation: bounce 2s infinite;
+}
+.scroll-indicator svg { width: 20px; height: 20px; stroke: var(--text-40); }
+
+/* ============================================================
+   FILTER BAR
+   ============================================================ */
+.filter-bar {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 48px;
+}
+.filter-btn {
+  padding: 10px 24px; border-radius: var(--radius-pill); font-size: 14px;
+  font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+  background: transparent; color: var(--text-60);
+  border: 1px solid var(--border-subtle);
+  font-family: 'Inter', sans-serif;
+}
+.filter-btn:hover {
+  border-color: var(--border-hover); color: var(--text-80);
+}
+.filter-btn.active {
+  background: var(--gradient); color: #000; border-color: transparent;
+}
+.search-box {
+  flex: 1; min-width: 200px; padding: 10px 20px; border-radius: var(--radius-pill);
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  color: var(--text-80); font-size: 14px; font-family: 'Inter', sans-serif;
+  outline: none; transition: border-color 0.3s ease;
+}
+.search-box::placeholder { color: var(--text-40); }
+.search-box:focus { border-color: var(--pink); }
+
+/* ============================================================
+   SKILL CARDS
+   ============================================================ */
+.skills-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+@media (max-width: 480px) {
+  .skills-grid { grid-template-columns: 1fr; }
+}
+.skill-card {
+  background: linear-gradient(180deg, var(--bg-card) 0%, #0d0d0d 100%);
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+  padding: 28px; cursor: pointer; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative; overflow: hidden;
+}
+.skill-card::before {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(254,49,132,0.08) 0%, transparent 70%);
+  transition: all 0.4s ease; opacity: 0;
+}
+.skill-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+.skill-card:hover::before { opacity: 1; transform: scale(1.5); }
+.skill-card.expanded {
+  border-color: rgba(254,49,132,0.2);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 80px rgba(254,49,132,0.08);
+}
+
+.skill-card-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+.skill-icon {
+  width: 48px; height: 48px; border-radius: var(--radius-md); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(254,49,132,0.08); border: 1px solid rgba(254,49,132,0.15);
+  font-size: 20px; transition: all 0.3s ease;
+}
+.skill-card:hover .skill-icon {
+  box-shadow: 0 0 24px rgba(254,49,132,0.2);
+  border-color: rgba(254,49,132,0.3);
+}
+.skill-card-meta { flex: 1; }
+.skill-name {
+  font-family: 'Anton', sans-serif; text-transform: uppercase; font-weight: 400;
+  font-size: 20px; color: var(--text-100); line-height: 1.2;
+}
+.skill-type-badge {
+  display: inline-block; padding: 2px 10px; border-radius: var(--radius-pill);
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; margin-top: 6px;
+}
+.skill-type-badge.marketing {
+  background: rgba(254,49,132,0.12); color: var(--pink);
+  border: 1px solid rgba(254,49,132,0.2);
+}
+.skill-type-badge.design {
+  background: rgba(236,114,17,0.12); color: var(--orange);
+  border: 1px solid rgba(236,114,17,0.2);
+}
+.skill-type-badge.system {
+  background: rgba(255,255,255,0.06); color: var(--text-60);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.skill-description {
+  font-size: 15px; color: var(--text-60); line-height: 1.6; margin-bottom: 16px;
+}
+.skill-command {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm); font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 13px; color: var(--pink); transition: all 0.2s ease;
+  cursor: pointer;
+}
+.skill-command:hover { background: rgba(254,49,132,0.08); border-color: rgba(254,49,132,0.2); }
+.skill-command .copy-icon { opacity: 0.4; transition: opacity 0.2s; font-size: 11px; }
+.skill-command:hover .copy-icon { opacity: 1; }
+
+/* Expanded detail panel */
+.skill-details {
+  max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.skill-card.expanded .skill-details { max-height: 800px; }
+.skill-details-inner {
+  padding-top: 20px; margin-top: 20px;
+  border-top: 1px solid var(--border-subtle);
+}
+.detail-section { margin-bottom: 16px; }
+.detail-section:last-child { margin-bottom: 0; }
+.detail-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text-40); margin-bottom: 8px;
+}
+.detail-list { list-style: none; }
+.detail-list li {
+  font-size: 14px; color: var(--text-60); padding: 4px 0;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.detail-list li::before {
+  content: ''; width: 4px; height: 4px; border-radius: 50%;
+  background: var(--pink); margin-top: 8px; flex-shrink: 0;
+}
+.detail-chains { display: flex; flex-wrap: wrap; gap: 6px; }
+.chain-tag {
+  padding: 4px 12px; border-radius: var(--radius-pill);
+  font-size: 12px; font-weight: 500; color: var(--text-60);
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle);
+}
+.chain-arrow { color: var(--pink); font-size: 12px; display: flex; align-items: center; }
+.expand-toggle {
+  display: flex; align-items: center; gap: 6px; margin-top: 16px;
+  font-size: 13px; color: var(--text-40); transition: color 0.2s;
+}
+.skill-card:hover .expand-toggle { color: var(--text-60); }
+.expand-toggle svg {
+  width: 16px; height: 16px; transition: transform 0.3s ease;
+}
+.skill-card.expanded .expand-toggle svg { transform: rotate(180deg); }
+
+/* ============================================================
+   WORKFLOWS
+   ============================================================ */
+.workflow-card {
+  background: linear-gradient(180deg, var(--bg-card) 0%, #0d0d0d 100%);
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+  padding: 28px; margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+.workflow-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-card-hover);
+}
+.workflow-name {
+  font-family: 'Anton', sans-serif; text-transform: uppercase; font-weight: 400;
+  font-size: 22px; color: var(--text-100); margin-bottom: 8px;
+}
+.workflow-desc {
+  font-size: 14px; color: var(--text-60); margin-bottom: 20px;
+}
+.workflow-steps {
+  display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+}
+.workflow-step {
+  display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+  background: rgba(254,49,132,0.06); border: 1px solid rgba(254,49,132,0.15);
+  border-radius: var(--radius-sm); font-size: 13px; font-weight: 600;
+  color: var(--pink); white-space: nowrap;
+}
+.workflow-step .step-num {
+  width: 20px; height: 20px; border-radius: 50%; background: var(--gradient);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #000;
+}
+.workflow-arrow {
+  width: 32px; display: flex; align-items: center; justify-content: center;
+  color: var(--text-40); flex-shrink: 0;
+}
+.workflow-arrow svg { width: 16px; height: 16px; }
+.workflow-plus {
+  font-size: 13px; color: var(--text-40); padding: 0 8px; font-weight: 600;
+}
+
+/* ============================================================
+   QUICK START
+   ============================================================ */
+.quickstart-steps {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;
+}
+.qs-step {
+  background: linear-gradient(180deg, var(--bg-card) 0%, #0d0d0d 100%);
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+  padding: 32px; position: relative; overflow: hidden;
+  transition: all 0.3s ease;
+}
+.qs-step:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-card-hover);
+}
+.qs-step-num {
+  font-family: 'Anton', sans-serif; font-size: 64px; text-transform: uppercase;
+  background: var(--gradient); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1; margin-bottom: 16px; opacity: 0.3;
+}
+.qs-step-title {
+  font-family: 'Anton', sans-serif; text-transform: uppercase; font-weight: 400;
+  font-size: 20px; color: var(--text-100); margin-bottom: 8px;
+}
+.qs-step-desc { font-size: 14px; color: var(--text-60); line-height: 1.6; }
+.qs-code {
+  margin-top: 16px; padding: 12px 16px; background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+  font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 13px;
+  color: var(--pink);
+}
+
+/* ============================================================
+   USE CASES TABLE
+   ============================================================ */
+.use-cases-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;
+}
+.use-case {
+  padding: 24px; background: var(--bg-surface);
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+}
+.use-case:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+}
+.use-case-goal {
+  font-size: 15px; font-weight: 600; color: var(--text-100); margin-bottom: 8px;
+}
+.use-case-command {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 12px;
+  color: var(--pink); opacity: 0.8;
+}
+
+/* ============================================================
+   BRAND BAR
+   ============================================================ */
+.brand-bar {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+  margin-top: 48px;
+}
+.brand-chip {
+  display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+}
+.brand-chip .swatch {
+  width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+}
+.brand-chip .chip-label {
+  font-size: 13px; color: var(--text-60); font-weight: 500;
+}
+.brand-chip .chip-value {
+  font-size: 13px; color: var(--text-80); font-family: 'JetBrains Mono', 'SF Mono', monospace;
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: all 0.3s ease; transform: translateY(-100%);
+}
+.top-nav.visible { transform: translateY(0); }
+.nav-logo {
+  font-family: 'Anton', sans-serif; text-transform: uppercase; font-size: 18px;
+  background: var(--gradient); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+}
+.nav-links { display: flex; gap: 32px; }
+.nav-links a {
+  font-size: 13px; color: var(--text-50); text-decoration: none;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text-100); }
+@media (max-width: 640px) { .nav-links { display: none; } }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  padding: 60px 0; border-top: 1px solid var(--border-subtle);
+  text-align: center;
+}
+.footer-logo {
+  font-family: 'Anton', sans-serif; text-transform: uppercase; font-size: 28px;
+  background: var(--gradient); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 12px;
+}
+.footer-tagline { font-size: 14px; color: var(--text-40); margin-bottom: 8px; }
+.footer-version { font-size: 12px; color: var(--text-40); }
+.footer-links {
+  display: flex; gap: 24px; justify-content: center; margin-top: 24px;
+}
+.footer-links a {
+  font-size: 13px; color: var(--text-50); text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--pink); }
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-20px, 20px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(254,49,132,0.4); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(254,49,132,0); }
+}
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+  40% { transform: translateX(-50%) translateY(-8px); }
+  60% { transform: translateX(-50%) translateY(-4px); }
+}
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  opacity: 0; transform: translateY(20px);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(20px);
+  padding: 12px 24px; background: var(--bg-card); border: 1px solid var(--border-accent);
+  border-radius: var(--radius-pill); font-size: 13px; color: var(--pink);
+  font-weight: 500; opacity: 0; transition: all 0.3s ease; z-index: 200;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="top-nav" id="topNav">
+  <div class="nav-logo">Gratitude Agents</div>
+  <div class="nav-links">
+    <a href="#agents">Agents</a>
+    <a href="#workflows">Workflows</a>
+    <a href="#quickstart">Quick Start</a>
+    <a href="#scenarios">Scenarios</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+    <div class="hero-grid"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="dot"></span> Claude Code Agent System</div>
+    <h1 class="hero-title">
+      <span class="gradient-text">GRATITUDE</span><br>AGENTS
+    </h1>
+    <p class="hero-subtitle">
+      14 AI-powered skills for marketing and design. Open the repo in Claude Code,
+      type a command, and let the agents do the heavy lifting.
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="number">14</div>
+        <div class="label">Skills</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">9</div>
+        <div class="label">Marketing</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">5</div>
+        <div class="label">Design</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">7</div>
+        <div class="label">Workflow Chains</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- Agents -->
+<section id="agents">
+  <div class="container">
+    <div class="section-label reveal">The System</div>
+    <h2 class="section-title reveal reveal-delay-1">EVERY AGENT,<br>ONE COMMAND</h2>
+    <p class="section-subtitle reveal reveal-delay-2" style="margin-bottom:40px;">
+      Each agent is a specialized Claude Code skill. They load brand context automatically,
+      chain into each other, and output production-ready content and visuals.
+    </p>
+
+    <div class="filter-bar reveal reveal-delay-3">
+      <button class="filter-btn active" data-filter="all">All 14</button>
+      <button class="filter-btn" data-filter="marketing">Marketing (9)</button>
+      <button class="filter-btn" data-filter="design">Design (5)</button>
+      <input type="text" class="search-box" placeholder="Search agents..." id="searchInput">
+    </div>
+
+    <div class="skills-grid" id="skillsGrid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- Workflows -->
+<section id="workflows" style="background: var(--bg-elevated);">
+  <div class="container">
+    <div class="section-label reveal">Compound Power</div>
+    <h2 class="section-title reveal reveal-delay-1">WORKFLOW CHAINS</h2>
+    <p class="section-subtitle reveal reveal-delay-2" style="margin-bottom:48px;">
+      Agents chain together. Start with strategy, flow into copy, finish with design.
+      Each skill feeds the next with context.
+    </p>
+    <div id="workflowsContainer"></div>
+  </div>
+</section>
+
+<!-- Quick Start -->
+<section id="quickstart">
+  <div class="container">
+    <div class="section-label reveal">Get Started</div>
+    <h2 class="section-title reveal reveal-delay-1">FOUR STEPS TO LAUNCH</h2>
+    <p class="section-subtitle reveal reveal-delay-2" style="margin-bottom:48px;">
+      From zero to first output in under a minute.
+    </p>
+    <div class="quickstart-steps">
+      <div class="qs-step reveal">
+        <div class="qs-step-num">01</div>
+        <div class="qs-step-title">OPEN THE REPO</div>
+        <div class="qs-step-desc">Open the gratitude-agents repo in Claude Code. The brand system loads automatically.</div>
+        <div class="qs-code">cd gratitude-agents && claude</div>
+      </div>
+      <div class="qs-step reveal reveal-delay-1">
+        <div class="qs-step-num">02</div>
+        <div class="qs-step-title">ASK THE ORCHESTRATOR</div>
+        <div class="qs-step-desc">Not sure which agent to use? Start here. It listens to your goal and routes you to the right skill.</div>
+        <div class="qs-code">/orchestrator</div>
+      </div>
+      <div class="qs-step reveal reveal-delay-2">
+        <div class="qs-step-num">03</div>
+        <div class="qs-step-title">RUN A SKILL</div>
+        <div class="qs-step-desc">Type the command and describe your brief. The agent loads brand memory, voice rules, and design tokens.</div>
+        <div class="qs-code">/direct-response-copy sponsor landing page</div>
+      </div>
+      <div class="qs-step reveal reveal-delay-3">
+        <div class="qs-step-num">04</div>
+        <div class="qs-step-title">CHAIN TO DESIGN</div>
+        <div class="qs-step-desc">Finished the copy? Chain into a design skill. It picks up the output and creates production visuals.</div>
+        <div class="qs-code">/web-mockup</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Use Cases / Scenarios -->
+<section id="scenarios" style="background: var(--bg-elevated);">
+  <div class="container">
+    <div class="section-label reveal">Real Scenarios</div>
+    <h2 class="section-title reveal reveal-delay-1">WHAT DO YOU NEED?</h2>
+    <p class="section-subtitle reveal reveal-delay-2" style="margin-bottom:48px;">
+      Pick your scenario. Here's which agents to run.
+    </p>
+    <div class="use-cases-grid" id="useCasesGrid"></div>
+  </div>
+</section>
+
+<!-- Brand -->
+<section id="brand">
+  <div class="container" style="text-align:center;">
+    <div class="section-label reveal" style="justify-content:center;">Built On</div>
+    <h2 class="section-title reveal reveal-delay-1">GRATITUDE BRAND SYSTEM</h2>
+    <p class="section-subtitle reveal reveal-delay-2" style="margin:0 auto 32px;">
+      Every agent references the same brand kit. Colors, fonts, voice, and positioning
+      are enforced automatically across all outputs.
+    </p>
+    <div class="brand-bar reveal reveal-delay-3">
+      <div class="brand-chip">
+        <div class="swatch" style="background:#FE3184;"></div>
+        <span class="chip-label">Pink</span>
+        <span class="chip-value">#FE3184</span>
+      </div>
+      <div class="brand-chip">
+        <div class="swatch" style="background:#FF6B35;"></div>
+        <span class="chip-label">Coral</span>
+        <span class="chip-value">#FF6B35</span>
+      </div>
+      <div class="brand-chip">
+        <div class="swatch" style="background:#ec7211;"></div>
+        <span class="chip-label">Orange</span>
+        <span class="chip-value">#ec7211</span>
+      </div>
+      <div class="brand-chip">
+        <div class="swatch" style="background:#000; border:1px solid rgba(255,255,255,0.2);"></div>
+        <span class="chip-label">Black</span>
+        <span class="chip-value">#000000</span>
+      </div>
+      <div class="brand-chip">
+        <span class="chip-label" style="font-family:'Anton',sans-serif; text-transform:uppercase; font-size:15px; color:var(--text-80);">Anton</span>
+        <span class="chip-value">Display</span>
+      </div>
+      <div class="brand-chip">
+        <span class="chip-label" style="font-size:15px; color:var(--text-80);">Inter</span>
+        <span class="chip-value">Body</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-logo">GRATITUDE</div>
+    <div class="footer-tagline">Gratitude isn't just felt. It's delivered.</div>
+    <div class="footer-version">Agent System v1.0 &middot; 14 Skills &middot; Built for Claude Code</div>
+    <div class="footer-links">
+      <a href="https://github.com/561Media-MRichards/gratitude-agents" target="_blank">GitHub Repo</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast">Copied to clipboard</div>
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+const skills = [
+  {
+    id: 'orchestrator', name: 'Orchestrator', type: 'system', icon: '&#x2728;',
+    command: '/orchestrator',
+    description: 'Routes you to the right skill or workflow chain based on your goal. Start here when you\'re not sure which agent to use.',
+    capabilities: ['Diagnoses business goals and content needs', 'Routes to specific skills or multi-step chains', 'Identifies target stakeholders', 'Recommends marketing + design combos'],
+    chains: ['Routes to all 14 skills'],
+    input: 'Describe your goal in plain language'
+  },
+  {
+    id: 'brand-voice', name: 'Brand Voice', type: 'marketing', icon: '&#x1F399;',
+    command: '/brand-voice',
+    description: 'Extracts and codifies a reusable voice profile through a 10-question diagnostic or sample analysis. Voice is saved to brand memory.',
+    capabilities: ['10-question voice diagnostic', 'Analyzes existing content for patterns', 'Creates voice dimension ratings (1-5 scale)', 'Builds word banks (use vs. never use)', 'Generates before/after rewrites'],
+    chains: ['/positioning-angles', '/direct-response-copy'],
+    input: 'Partner name or "us" for Gratitude.com'
+  },
+  {
+    id: 'positioning-angles', name: 'Positioning Angles', type: 'marketing', icon: '&#x1F3AF;',
+    command: '/positioning-angles',
+    description: 'Finds 5 distinct selling angles that create urgency and differentiation. Recommends the top 2 with lowest market saturation.',
+    capabilities: ['Competitive gap analysis', 'Generates 5 angles with headline examples', 'Identifies risk/trade-off per angle', 'Recommends top 2 angles with rationale', 'Saves to brand memory for reuse'],
+    chains: ['/direct-response-copy', '/content-atomizer'],
+    input: 'Campaign or offer + target stakeholder + competitors'
+  },
+  {
+    id: 'direct-response-copy', name: 'Direct Response Copy', type: 'marketing', icon: '&#x270D;',
+    command: '/direct-response-copy',
+    description: 'Writes conversion-focused copy for landing pages, ads, emails, and sponsor pitches. Uses PAS, AIDA, or BAB frameworks based on audience awareness level.',
+    capabilities: ['Landing page copy (hero, benefits, objections, CTA)', 'Ad copy with 3 headline variations', 'Email copy with subject line A/B variants', 'Awareness-level framework selection', 'Brand voice enforcement'],
+    chains: ['/web-mockup', '/deliverable-design', '/content-atomizer'],
+    input: 'Offer + audience + goal + awareness level'
+  },
+  {
+    id: 'email-sequences', name: 'Email Sequences', type: 'marketing', icon: '&#x1F4E7;',
+    command: '/email-sequences',
+    description: 'Builds complete multi-email sequences: sponsor welcome (5 emails), activator welcome (4), partner onboarding (5), sponsor sales (7), and nurture (ongoing).',
+    capabilities: ['5 sequence types with timed sends', 'Subject line A/B variants per email', 'Preview text optimization', 'One CTA per email, no fluff', 'Brand voice and terminology enforced'],
+    chains: ['/content-atomizer'],
+    input: 'Sequence type + audience + goal'
+  },
+  {
+    id: 'content-atomizer', name: 'Content Atomizer', type: 'marketing', icon: '&#x1F4A5;',
+    command: '/content-atomizer',
+    description: 'Takes one piece of pillar content and repurposes it into platform-native assets for LinkedIn, X, Instagram, TikTok, and YouTube.',
+    capabilities: ['LinkedIn posts + carousel scripts', 'X threads + standalone tweets', 'Instagram captions + Reel scripts', 'TikTok scripts (30-60s)', 'YouTube Shorts + descriptions'],
+    chains: ['/social-creative'],
+    input: 'Paste content or describe the source piece'
+  },
+  {
+    id: 'lead-magnet', name: 'Lead Magnet', type: 'marketing', icon: '&#x1F9F2;',
+    command: '/lead-magnet',
+    description: 'Generates 5 lead magnet concepts with titles, formats, and content so valuable the audience would pay for it. Then writes the full content.',
+    capabilities: ['5 concepts per session', '8 format options (checklist, guide, calculator, audit, etc.)', 'Full content writing', 'Opt-in page copy', 'Chains to design for PDF layout'],
+    chains: ['/deliverable-design'],
+    input: 'Target stakeholder + awareness level + goal'
+  },
+  {
+    id: 'newsletter', name: 'Newsletter', type: 'marketing', icon: '&#x1F4F0;',
+    command: '/newsletter',
+    description: 'Creates full newsletter issues with the one-big-idea structure. Subject lines, preview text, and body copy with audience-specific variants.',
+    capabilities: ['One-big-idea structure', 'Subject line A/B testing', 'Audience variants (sponsor/activator/partner)', 'Value-first format (2 value : 1 pitch ratio)', 'Complete issues ready to send'],
+    chains: ['/content-atomizer', '/social-creative'],
+    input: 'Topic or content theme + audience'
+  },
+  {
+    id: 'gratitude-content-strategy', name: 'Content Strategy', type: 'marketing', icon: '&#x1F4CB;',
+    command: '/gratitude-content-strategy',
+    description: 'The master strategy skill. Builds complete content plans with pillars, platform strategy, monthly calendars, and stakeholder-specific messaging.',
+    capabilities: ['Content pillar definition', 'Platform-specific strategy', 'Monthly content calendars', 'Stakeholder message mapping', 'Campaign planning frameworks'],
+    chains: ['/deliverable-design', '/newsletter', '/content-atomizer'],
+    input: 'Stakeholder, campaign goal, or "platform" for overall strategy'
+  },
+  {
+    id: 'social-creative', name: 'Social Creative', type: 'design', icon: '&#x1F3A8;',
+    command: '/social-creative',
+    description: 'Creates production-ready social graphics with exact brand specs. Outputs PNG files sized for Instagram, LinkedIn, Facebook, X, and YouTube.',
+    capabilities: ['Instagram posts, stories, carousels', 'LinkedIn landscapes and squares', 'YouTube thumbnails', 'Stat callouts and infographic posts', 'Logo placement and safe zone enforcement'],
+    chains: [],
+    input: 'Platform + post type + content/copy'
+  },
+  {
+    id: 'deliverable-design', name: 'Deliverable Design', type: 'design', icon: '&#x1F4D1;',
+    command: '/deliverable-design',
+    description: 'Creates multi-page branded PDFs: impact reports, sponsor kits, partner decks, case studies, and lead magnet PDFs with cover pages and interior layouts.',
+    capabilities: ['Impact reports (4-8 pages)', 'Sponsor kits (5-10 pages)', 'Partner decks (4-6 pages)', 'Case studies (3-5 pages)', 'Lead magnet PDFs (5-12 pages)'],
+    chains: [],
+    input: 'Deliverable type + content to design'
+  },
+  {
+    id: 'web-mockup', name: 'Web Mockup', type: 'design', icon: '&#x1F5A5;',
+    command: '/web-mockup',
+    description: 'Creates high-fidelity static mockups of Gratitude.com pages with the full 6-component hover system, exact design tokens, and responsive layouts.',
+    capabilities: ['Full landing page mockups (1440px)', 'Hero section designs (1440x900)', 'Interactive card hover state demos', 'Exact design token compliance', 'CTA and button system'],
+    chains: [],
+    input: 'Page type + purpose + key content'
+  },
+  {
+    id: 'brand-asset-design', name: 'Brand Asset Design', type: 'design', icon: '&#x1F4BC;',
+    command: '/brand-asset-design',
+    description: 'Creates general brand assets: presentation slides (1920x1080), email headers (600x200), OG images (1200x630), infographics, and miscellaneous collateral.',
+    capabilities: ['Presentation slide decks', 'Email header graphics', 'OG/social share images', 'Infographics and data visuals', 'Zoom backgrounds, favicons, banners'],
+    chains: [],
+    input: 'Asset type + purpose + key content'
+  },
+  {
+    id: 'canvas-art', name: 'Canvas Art', type: 'design', icon: '&#x1F308;',
+    command: '/canvas-art',
+    description: 'Creates abstract visual compositions for hero backgrounds and campaign key art. Two-phase process: design philosophy first, then canvas expression.',
+    capabilities: ['Design philosophy creation', 'Museum/magazine quality execution', 'Hero backgrounds (1920x1080)', 'Campaign key visuals', 'Multi-page art collections'],
+    chains: [],
+    input: 'Concept, mood, or purpose of the visual'
+  }
+];
+
+const workflows = [
+  {
+    name: 'Full Campaign',
+    desc: 'End-to-end: find the angle, write the copy, atomize across platforms, design the visuals and deck.',
+    steps: ['/positioning-angles', '/direct-response-copy', '/content-atomizer', '/social-creative'],
+    hasBranch: { after: 3, extra: '/deliverable-design' }
+  },
+  {
+    name: 'Landing Page',
+    desc: 'Write conversion copy, then design a high-fidelity mockup with the full hover system.',
+    steps: ['/direct-response-copy', '/web-mockup']
+  },
+  {
+    name: 'Sponsor Kit',
+    desc: 'Write the pitch copy, then design a polished multi-page PDF sponsor kit.',
+    steps: ['/direct-response-copy', '/deliverable-design']
+  },
+  {
+    name: 'Lead Magnet PDF',
+    desc: 'Generate the concept and content, then design a branded PDF that earns email addresses.',
+    steps: ['/lead-magnet', '/deliverable-design']
+  },
+  {
+    name: 'Social Content',
+    desc: 'Atomize pillar content into platform posts, then create the matching graphics.',
+    steps: ['/content-atomizer', '/social-creative']
+  },
+  {
+    name: 'Newsletter Distribution',
+    desc: 'Write the newsletter, atomize for social, then design social graphics to promote it.',
+    steps: ['/newsletter', '/content-atomizer', '/social-creative']
+  },
+  {
+    name: 'Impact Report',
+    desc: 'Build a content strategy, then design a professional impact report PDF.',
+    steps: ['/gratitude-content-strategy', '/deliverable-design']
+  }
+];
+
+const useCases = [
+  { goal: 'I need to pitch a sponsor', command: '/orchestrator → positioning-angles → direct-response-copy → deliverable-design' },
+  { goal: 'Build a landing page for activators', command: '/direct-response-copy → /web-mockup' },
+  { goal: 'Create social content for the week', command: '/content-atomizer → /social-creative' },
+  { goal: 'Write a welcome email for new sponsors', command: '/email-sequences sponsor welcome' },
+  { goal: 'Design an impact report for Q1', command: '/gratitude-content-strategy → /deliverable-design' },
+  { goal: 'Build an opt-in lead magnet PDF', command: '/lead-magnet → /deliverable-design' },
+  { goal: 'Create hero art for the homepage', command: '/canvas-art hero background' },
+  { goal: 'Write this week\'s newsletter', command: '/newsletter → /content-atomizer' },
+  { goal: 'Refresh our brand voice', command: '/brand-voice us' },
+  { goal: 'Design slides for a partner pitch', command: '/brand-asset-design presentation slides' },
+  { goal: 'Find the best angle for a campaign', command: '/positioning-angles campaign + audience' },
+  { goal: 'Create OG images for blog posts', command: '/brand-asset-design OG image' },
+];
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderSkills(filter = 'all', search = '') {
+  const grid = document.getElementById('skillsGrid');
+  const filtered = skills.filter(s => {
+    const matchFilter = filter === 'all' || s.type === filter;
+    const matchSearch = search === '' ||
+      s.name.toLowerCase().includes(search) ||
+      s.description.toLowerCase().includes(search) ||
+      s.command.toLowerCase().includes(search);
+    return matchFilter && matchSearch;
+  });
+
+  grid.innerHTML = filtered.map(s => `
+    <div class="skill-card" data-skill="${s.id}" onclick="toggleSkill(this)">
+      <div class="skill-card-header">
+        <div class="skill-icon">${s.icon}</div>
+        <div class="skill-card-meta">
+          <div class="skill-name">${s.name}</div>
+          <span class="skill-type-badge ${s.type}">${s.type}</span>
+        </div>
+      </div>
+      <div class="skill-description">${s.description}</div>
+      <div class="skill-command" onclick="event.stopPropagation(); copyCommand('${s.command}')">
+        ${s.command} <span class="copy-icon">&#x2398;</span>
+      </div>
+      <div class="skill-details">
+        <div class="skill-details-inner">
+          <div class="detail-section">
+            <div class="detail-label">Capabilities</div>
+            <ul class="detail-list">
+              ${s.capabilities.map(c => `<li>${c}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="detail-section">
+            <div class="detail-label">Input</div>
+            <p style="font-size:14px; color:var(--text-60);">${s.input}</p>
+          </div>
+          ${s.chains.length > 0 ? `
+          <div class="detail-section">
+            <div class="detail-label">Chains Into</div>
+            <div class="detail-chains">
+              ${s.chains.map(c => `<span class="chain-tag">${c}</span>`).join('<span class="chain-arrow">&#x2192;</span>')}
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+      <div class="expand-toggle">
+        <span>Details</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderWorkflows() {
+  const container = document.getElementById('workflowsContainer');
+  container.innerHTML = workflows.map(w => `
+    <div class="workflow-card reveal">
+      <div class="workflow-name">${w.name}</div>
+      <div class="workflow-desc">${w.desc}</div>
+      <div class="workflow-steps">
+        ${w.steps.map((s, i) => `
+          ${i > 0 ? `<div class="workflow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>` : ''}
+          <div class="workflow-step"><span class="step-num">${i + 1}</span>${s}</div>
+          ${w.hasBranch && i === w.hasBranch.after - 1 ? `<span class="workflow-plus">+</span><div class="workflow-step"><span class="step-num">${i + 2}</span>${w.hasBranch.extra}</div>` : ''}
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderUseCases() {
+  const grid = document.getElementById('useCasesGrid');
+  grid.innerHTML = useCases.map(u => `
+    <div class="use-case reveal">
+      <div class="use-case-goal">${u.goal}</div>
+      <div class="use-case-command">${u.command}</div>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   INTERACTIONS
+   ============================================================ */
+function toggleSkill(card) {
+  const wasExpanded = card.classList.contains('expanded');
+  document.querySelectorAll('.skill-card.expanded').forEach(c => c.classList.remove('expanded'));
+  if (!wasExpanded) card.classList.add('expanded');
+}
+
+function copyCommand(cmd) {
+  navigator.clipboard.writeText(cmd).then(() => {
+    const toast = document.getElementById('toast');
+    toast.textContent = `Copied ${cmd}`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  });
+}
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderSkills(btn.dataset.filter, document.getElementById('searchInput').value.toLowerCase());
+  });
+});
+
+// Search
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+  renderSkills(activeFilter, e.target.value.toLowerCase());
+});
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+function observeReveals() {
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
+
+// Nav show/hide on scroll
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('topNav');
+  const scrollY = window.scrollY;
+  if (scrollY > 400) {
+    nav.classList.add('visible');
+  } else {
+    nav.classList.remove('visible');
+  }
+  lastScroll = scrollY;
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderSkills();
+renderWorkflows();
+renderUseCases();
+observeReveals();
+// Re-observe after dynamic content renders
+setTimeout(observeReveals, 100);
+</script>
+
+</body>
+</html>
