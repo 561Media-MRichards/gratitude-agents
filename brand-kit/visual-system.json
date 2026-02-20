@@ -1,0 +1,344 @@
+{
+  "chunk_id": "visual-system",
+  "domain": "design",
+  "category": "foundation",
+  "status": "active",
+  "version": "1.0",
+  "source": "gratitude.com",
+  "source_project": "/Users/michaelrichards/gratitude-site",
+
+  "colors": {
+    "primary": {
+      "pink": {
+        "hex": "#FE3184",
+        "rgb": "254 49 132",
+        "role": "Primary accent, gradient start, section labels, glow source"
+      },
+      "coral": {
+        "hex": "#FF6B35",
+        "rgb": "255 107 53",
+        "role": "Gradient midpoint"
+      },
+      "orange": {
+        "hex": "#ec7211",
+        "rgb": "236 114 17",
+        "role": "Brand orange, gradient end, CTAs"
+      }
+    },
+    "extended": {
+      "pink": {
+        "400": "#FF4D8D",
+        "500": "#FE3184",
+        "600": "#E82878"
+      },
+      "primary": {
+        "50": "#fef7ec",
+        "100": "#fdecd3",
+        "200": "#f9d5a5",
+        "300": "#f5b76d",
+        "400": "#f09032",
+        "500": "#ec7211",
+        "600": "#dd5807",
+        "700": "#b73f09",
+        "800": "#94320f",
+        "900": "#792a10"
+      },
+      "coral": {
+        "400": "#FF8C5A",
+        "500": "#FF6B35",
+        "600": "#E85A2A"
+      }
+    },
+    "backgrounds": {
+      "pure_black": "#000000",
+      "near_black": "#0a0a0a",
+      "card_dark": "#0d0d0d",
+      "elevated": "#1a1a1a",
+      "border_dark": "#242424",
+      "lighter_accent": "#2a2a2a"
+    },
+    "dark_scale": {
+      "950": "#000000",
+      "900": "#0a0a0a",
+      "800": "#0d0d0d",
+      "700": "#1a1a1a",
+      "600": "#242424",
+      "500": "#2a2a2a"
+    },
+    "text": {
+      "primary": "rgba(255, 255, 255, 1.0)",
+      "strong": "rgba(255, 255, 255, 0.80)",
+      "secondary": "rgba(255, 255, 255, 0.70)",
+      "body": "rgba(255, 255, 255, 0.60)",
+      "muted": "rgba(255, 255, 255, 0.50)",
+      "caption": "rgba(255, 255, 255, 0.40)"
+    },
+    "text_opacity_scale": [1.0, 0.80, 0.70, 0.60, 0.50, 0.40]
+  },
+
+  "gradients": {
+    "signature": {
+      "css": "linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)",
+      "name": "Signature / Pink-Coral-Orange",
+      "stops": 3,
+      "usage": "Primary CTA buttons, text highlights, hover accent lines, icon glows, border accents"
+    },
+    "text": {
+      "css": "linear-gradient(90deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)",
+      "name": "Text Gradient",
+      "usage": "Gradient text effect (.text-gradient class)"
+    },
+    "glow": {
+      "css": "radial-gradient(circle at 50% 50%, rgba(254, 49, 132, 0.4) 0%, rgba(254, 49, 132, 0.1) 40%, transparent 70%)",
+      "name": "Glow Gradient",
+      "usage": "Background glow effect"
+    },
+    "card": {
+      "css": "linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%)",
+      "name": "Card Background",
+      "usage": "Standard card background gradient"
+    },
+    "hero": {
+      "css_layers": [
+        "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(254, 49, 132, 0.15) 0%, transparent 50%)",
+        "radial-gradient(ellipse 60% 40% at 80% 20%, rgba(255, 107, 53, 0.1) 0%, transparent 50%)",
+        "radial-gradient(ellipse 50% 30% at 20% 80%, rgba(236, 114, 17, 0.08) 0%, transparent 50%)"
+      ],
+      "name": "Hero Ambient",
+      "usage": "Layered radial glows for hero section backgrounds"
+    },
+    "card_overlay": {
+      "css": "linear-gradient(to top, rgba(13, 13, 13, 0.95) 0%, rgba(13, 13, 13, 0.6) 50%, transparent 100%)",
+      "name": "Card Overlay",
+      "usage": "Image card overlays for text legibility"
+    }
+  },
+
+  "borders": {
+    "subtle": "rgba(255, 255, 255, 0.08)",
+    "hover": "rgba(255, 255, 255, 0.15)",
+    "accent": "rgba(254, 49, 132, 0.3)",
+    "accent_strong": "rgba(254, 49, 132, 0.5)",
+    "gradient": {
+      "css": "linear-gradient(135deg, rgba(254, 49, 132, 0.5), transparent 50%, rgba(236, 114, 17, 0.3))",
+      "usage": "Gradient border using mask technique"
+    },
+    "gradient_full": {
+      "css": "linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)",
+      "usage": "Full gradient border ring"
+    }
+  },
+
+  "shadows": {
+    "card": "0 4px 24px rgba(0, 0, 0, 0.3)",
+    "card_hover": "0 20px 60px rgba(0, 0, 0, 0.4), 0 0 80px rgba(254, 49, 132, 0.1)",
+    "glow_pink": "0 0 60px rgba(254, 49, 132, 0.3)",
+    "glow_orange": "0 0 60px rgba(236, 114, 17, 0.3)",
+    "glow_sm": "0 0 30px rgba(254, 49, 132, 0.2)",
+    "cta": "0 10px 40px rgba(254, 49, 132, 0.3)",
+    "cta_hover": "0 15px 50px rgba(254, 49, 132, 0.4)",
+    "icon_glow": "0 0 30px rgba(254, 49, 132, 0.3)",
+    "focus": "0 0 0 3px rgba(254, 49, 132, 0.4)"
+  },
+
+  "radii": {
+    "sm": "0.375rem",
+    "md": "0.625rem",
+    "lg": "1rem",
+    "xl": "1.5rem",
+    "2xl": "2rem",
+    "4xl": "32px",
+    "5xl": "40px",
+    "full": "9999px"
+  },
+
+  "typography": {
+    "display": {
+      "family": "Anton",
+      "fallback": "Impact, sans-serif",
+      "weights": [400],
+      "text_transform": "uppercase",
+      "usage": "Headlines, hero text, display numbers. ALWAYS uppercase. Single weight only."
+    },
+    "body": {
+      "family": "Inter",
+      "fallback": "system-ui, sans-serif",
+      "weights": [400, 500, 600, 700],
+      "usage": "Body text, UI elements, labels, captions, supporting text"
+    },
+    "scale": {
+      "display-2xl": { "size": "120px", "line_height": 0.95, "letter_spacing": "-0.02em", "family": "display" },
+      "display-xl": { "size": "96px", "line_height": 0.95, "letter_spacing": "-0.02em", "family": "display" },
+      "display-lg": { "size": "72px", "line_height": 1.0, "letter_spacing": "-0.02em", "family": "display" },
+      "display": { "size": "56px", "line_height": 1.05, "letter_spacing": "-0.01em", "family": "display" },
+      "heading": { "size": "42px", "line_height": 1.1, "family": "display" },
+      "heading-sm": { "size": "32px", "line_height": 1.15, "family": "display" },
+      "body_lg": { "size": "18px", "weight": 400, "family": "body", "line_height": 1.7, "color": "text.body" },
+      "body": { "size": "16px", "weight": 400, "family": "body", "line_height": 1.65, "color": "text.body" },
+      "sm": { "size": "14px", "weight": 500, "family": "body", "color": "text.muted" },
+      "xs": { "size": "12px", "weight": 600, "family": "body", "letter_spacing": "0.1em", "text_transform": "uppercase", "color": "text.caption" }
+    }
+  },
+
+  "spacing": {
+    "section": { "mobile": "6rem", "desktop": "8rem", "tailwind": "py-24 lg:py-32" },
+    "container": { "max_width": "1200px", "padding": "20px", "tailwind": "max-w-[1200px] mx-auto px-5" },
+    "component": { "min": "2rem", "max": "4rem" },
+    "element": { "min": "1rem", "max": "1.5rem" }
+  },
+
+  "hover_system": {
+    "description": "6-component hover system for all interactive cards",
+    "components": {
+      "1_glow_orb": {
+        "description": "Background glow orb that fades in from corner",
+        "css": "absolute -top-20 -left-20 w-40 h-40 rounded-full blur-3xl",
+        "gradient": "linear-gradient(135deg, rgba(254, 49, 132, 0.4), rgba(236, 114, 17, 0.3))",
+        "transition": "opacity 0.7s, all 0.7s"
+      },
+      "2_text_brightness": {
+        "description": "Text opacity increases on hover",
+        "from": "text-white/50 or text-white/60",
+        "to": "text-white/70 or text-white/80",
+        "transition": "color 0.3s"
+      },
+      "3_icon_scale": {
+        "description": "Icon scales up on hover",
+        "transform": "group-hover:scale-110",
+        "transition": "transform 0.5s"
+      },
+      "4_icon_glow": {
+        "description": "Icon container gets glow shadow",
+        "shadow": "0 0 30px rgba(254, 49, 132, 0.3)",
+        "border": "border-pink-500/50",
+        "transition": "box-shadow 0.5s, border-color 0.5s"
+      },
+      "5_bottom_accent": {
+        "description": "Gradient accent line scales in from center at bottom",
+        "gradient": "linear-gradient(90deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)",
+        "height": "4px",
+        "transform": "scale-x-0 to scale-x-100",
+        "transition": "transform 0.5s, opacity 0.5s"
+      },
+      "6_border_glow": {
+        "description": "Inset border + outer glow appears",
+        "shadow": "inset 0 0 0 1px rgba(254, 49, 132, 0.3), 0 0 40px rgba(254, 49, 132, 0.15)",
+        "transition": "all 0.5s"
+      }
+    },
+    "transition_durations": {
+      "fast": "300ms",
+      "medium": "500ms",
+      "slow": "700ms"
+    }
+  },
+
+  "glow_colors": {
+    "pink_light": "rgba(254, 49, 132, 0.3)",
+    "pink_standard": "rgba(254, 49, 132, 0.4)",
+    "pink_intense": "rgba(254, 49, 132, 0.5)",
+    "orange_light": "rgba(236, 114, 17, 0.3)",
+    "orange_standard": "rgba(236, 114, 17, 0.4)"
+  },
+
+  "components": {
+    "buttons": {
+      "primary": {
+        "background": "linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)",
+        "color": "#ffffff",
+        "border_radius": "9999px",
+        "padding": "1rem 2rem",
+        "font_family": "Inter",
+        "font_weight": 600,
+        "shadow": "0 10px 40px rgba(254, 49, 132, 0.3)",
+        "hover_transform": "translateY(-2px)",
+        "hover_shadow": "0 15px 50px rgba(254, 49, 132, 0.4)"
+      },
+      "secondary": {
+        "background": "transparent",
+        "color": "#ffffff",
+        "border": "1px solid rgba(255, 255, 255, 0.2)",
+        "border_radius": "9999px",
+        "padding": "1rem 2rem",
+        "font_weight": 600,
+        "hover_bg": "rgba(255, 255, 255, 0.05)",
+        "hover_border": "rgba(255, 255, 255, 0.4)"
+      }
+    },
+    "cards": {
+      "standard": {
+        "background": "linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%)",
+        "border": "1px solid rgba(255, 255, 255, 0.08)",
+        "border_radius": "1rem",
+        "hover_border": "rgba(255, 255, 255, 0.15)",
+        "hover_transform": "translateY(-8px)",
+        "hover_shadow": "0 20px 60px rgba(0, 0, 0, 0.4), 0 0 80px rgba(254, 49, 132, 0.1)"
+      }
+    },
+    "icons": {
+      "container": {
+        "width": "56px",
+        "height": "56px",
+        "border_radius": "12px",
+        "background": "rgba(254, 49, 132, 0.1)",
+        "border": "1px solid rgba(254, 49, 132, 0.2)",
+        "hover_border": "rgba(254, 49, 132, 0.5)",
+        "hover_shadow": "0 0 30px rgba(254, 49, 132, 0.3)"
+      },
+      "style": {
+        "stroke_width": 1.5,
+        "color": "#FE3184",
+        "hover_scale": 1.1
+      }
+    },
+    "section_labels": {
+      "font_size": "0.875rem",
+      "font_weight": 400,
+      "letter_spacing": "0.1em",
+      "text_transform": "uppercase",
+      "color": "#FE3184"
+    },
+    "badges": {
+      "background": "rgba(254, 49, 132, 0.1)",
+      "border": "1px solid rgba(254, 49, 132, 0.2)",
+      "border_radius": "9999px",
+      "font_size": "0.75rem",
+      "font_weight": 600,
+      "letter_spacing": "0.1em",
+      "text_transform": "uppercase",
+      "color": "#FE3184"
+    }
+  },
+
+  "backgrounds": {
+    "grid": {
+      "css": "linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)",
+      "size": "60px 60px",
+      "opacity": 0.30
+    },
+    "dividers": {
+      "subtle": "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1) 50%, transparent)",
+      "accent": "linear-gradient(90deg, transparent, rgba(254, 49, 132, 0.5) 50%, transparent)"
+    }
+  },
+
+  "animations": {
+    "reveal": { "keyframes": "translateY(40px) opacity(0) -> translateY(0) opacity(1)", "duration": "0.8s", "easing": "ease-out" },
+    "fade_in": { "keyframes": "opacity(0) -> opacity(1)", "duration": "1s", "easing": "ease-out" },
+    "float": { "keyframes": "translateY(0) -> translateY(-20px) -> translateY(0)", "duration": "6s", "easing": "ease-in-out", "iteration": "infinite" },
+    "pulse_glow": { "keyframes": "box-shadow 20px/0.3 -> 50px/0.5 -> 20px/0.3", "duration": "2s", "easing": "ease-in-out", "iteration": "infinite" },
+    "shimmer": { "keyframes": "background-position -200% -> 200%", "duration": "2s", "iteration": "infinite" },
+    "glow_pulse": { "keyframes": "opacity 0.5 -> 0.8 -> 0.5", "duration": "3s", "iteration": "infinite" },
+    "slide_up": { "keyframes": "translateY(30px) opacity(0) -> translateY(0) opacity(1)", "duration": "0.6s", "easing": "ease-out" }
+  },
+
+  "logo": {
+    "variants": {
+      "svg_color": { "file": "logos/Gratitude.svg", "usage": "Light backgrounds, full color display" },
+      "svg_white": { "file": "logos/gratitude-white.svg", "usage": "Dark backgrounds, hero sections" },
+      "png_white": { "file": "logos/gratitude-logo-white.png", "usage": "Canvas compositing on dark backgrounds" },
+      "png_color": { "file": "logos/gratitude-logo-color.png", "usage": "Canvas compositing on light backgrounds" }
+    },
+    "rendering_note": "SVGs are clean (not Adobe ImageReady). Both sharp and @napi-rs/canvas can handle them. PNGs pre-generated for canvas convenience."
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "gratitude-agents",
+  "version": "1.0.0",
+  "description": "Unified agent system combining marketing content skills with visual design skills for Gratitude.com. Built for Claude Code.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.94",
+    "sharp": "^0.34.5"
+  }
+}

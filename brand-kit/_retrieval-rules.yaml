@@ -1,0 +1,112 @@
+# Task-to-chunk mappings for Gratitude.com agent skills
+
+task_profiles:
+
+  sponsor_materials:
+    description: "Writing sponsor kits, proposals, or partner communications"
+    always_load:
+      - "positioning-core"
+      - "voice-core"
+      - "messaging-framework"
+    load_if_relevant:
+      - "constraints-messaging"
+      - "terminology"
+    token_budget: 2200
+
+  website_copy:
+    description: "Writing or editing copy for gratitude.com"
+    always_load:
+      - "voice-core"
+      - "positioning-core"
+    load_if_relevant:
+      - "messaging-framework"
+      - "constraints-messaging"
+    token_budget: 2000
+
+  social_media:
+    description: "Social posts, captions, LinkedIn content"
+    always_load:
+      - "voice-core"
+      - "positioning-core"
+    load_if_relevant:
+      - "constraints-messaging"
+    token_budget: 1400
+
+  email_campaign:
+    description: "Sponsor sequences, activator emails, partner communications"
+    always_load:
+      - "voice-core"
+      - "messaging-framework"
+    load_if_relevant:
+      - "positioning-core"
+      - "constraints-messaging"
+    token_budget: 1800
+
+  ad_copy:
+    description: "Paid ads for sponsor acquisition or activator recruitment"
+    always_load:
+      - "voice-core"
+    load_if_relevant:
+      - "positioning-core"
+      - "terminology"
+    token_budget: 1200
+
+  social_graphic:
+    description: "Creating social media graphics and visual content"
+    always_load:
+      - "visual-system"
+      - "voice-core"
+    load_if_relevant:
+      - "positioning-core"
+    design_load:
+      - "platform-specs"
+      - "typography-guide"
+    token_budget: 1800
+
+  deliverable_design:
+    description: "Creating branded PDFs: impact reports, sponsor kits, partner decks"
+    always_load:
+      - "visual-system"
+      - "voice-core"
+      - "positioning-core"
+    load_if_relevant:
+      - "messaging-framework"
+    design_load:
+      - "template-registry"
+      - "typography-guide"
+    token_budget: 2400
+
+  web_mockup:
+    description: "Static visual mockups of Gratitude.com pages with full hover system"
+    always_load:
+      - "visual-system"
+      - "voice-core"
+    load_if_relevant:
+      - "positioning-core"
+      - "messaging-framework"
+    design_load:
+      - "typography-guide"
+    token_budget: 2000
+
+  brand_asset:
+    description: "Presentation slides, email headers, OG images"
+    always_load:
+      - "visual-system"
+    load_if_relevant:
+      - "voice-core"
+      - "positioning-core"
+    design_load:
+      - "template-registry"
+      - "typography-guide"
+    token_budget: 1600
+
+  canvas_art:
+    description: "Abstract/artistic visual compositions with Gratitude glow aesthetic"
+    always_load:
+      - "visual-system"
+    load_if_relevant:
+      - "positioning-core"
+    design_load:
+      - "canvas-philosophy-library"
+      - "illustration-style"
+    token_budget: 1400

@@ -1,0 +1,66 @@
+chunk_id: "positioning-core"
+domain: "positioning"
+category: "foundation"
+context_tags:
+  - "value-proposition"
+  - "positioning-statement"
+  - "what-gratitude-is"
+  - "platform-model"
+token_count: 400
+format: "yaml"
+version: "1.0"
+last_updated: "2026-02-20"
+status: "active"
+summary: >-
+  Core positioning and value proposition for Gratitude.com.
+  Technology platform that turns gratitude into real acts of good.
+  Companies sponsor, people activate, Gratitude delivers impact.
+
+company:
+  name: "Gratitude.com"
+  url: "gratitude.com"
+  tagline: "Gratitude isn't just felt. It's delivered."
+  category: "Impact technology platform"
+
+value_proposition: >-
+  Gratitude.com is a technology platform that turns gratitude into real acts of
+  good. Companies sponsor meaningful impact, people activate it, and Gratitude.com
+  delivers it into the world instantly and at scale. We connect corporate
+  sponsorship with individual action to create measurable, documented change.
+
+positioning_statement: >-
+  For companies that want their social impact to be real, measurable, and
+  activated by real people, Gratitude.com is the platform that turns corporate
+  goodwill into delivered outcomes. We're not a donation portal. We're an
+  activation engine.
+
+platform_model:
+  description: "Three-sided platform connecting sponsors, activators, and impact recipients"
+  sides:
+    - name: "Sponsors"
+      role: "Companies that fund impact through sponsorship"
+      motivation: "CSR outcomes, brand association, measurable social impact"
+    - name: "Activators"
+      role: "People who activate sponsored impact through gratitude actions"
+      motivation: "Personal meaning, easy action, visible results"
+    - name: "Impact Recipients"
+      role: "Nonprofits, communities, and causes that receive delivered impact"
+      motivation: "Funding, visibility, scalable support"
+
+key_differentiators:
+  - "Real activation, not passive donation — people participate in the impact"
+  - "Instant delivery at scale — technology-driven, not manual"
+  - "Measurable outcomes — every act of gratitude documented and reported"
+  - "Corporate sponsorship model — brands fund impact, not individuals"
+  - "Bridges the gap between corporate CSR and personal meaning"
+
+stakeholders:
+  sponsors:
+    description: "Corporate partners who fund impact"
+    key_concerns: ["ROI on social impact", "brand alignment", "measurable outcomes", "employee engagement"]
+  activators:
+    description: "Individuals who activate gratitude"
+    key_concerns: ["ease of participation", "seeing real impact", "personal meaning", "sharing their contribution"]
+  nonprofits:
+    description: "Organizations that receive and deliver impact"
+    key_concerns: ["reliable funding", "scalable programs", "visibility", "partnership quality"]

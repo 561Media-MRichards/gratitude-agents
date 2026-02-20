@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gratitude.com — Brand System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand-pink: #FE3184;
+  --brand-coral: #FF6B35;
+  --brand-orange: #ec7211;
+  --dark-950: #000000;
+  --dark-900: #0a0a0a;
+  --dark-800: #0d0d0d;
+  --dark-700: #1a1a1a;
+  --dark-600: #242424;
+  --dark-500: #2a2a2a;
+  --gradient-signature: linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%);
+  --gradient-text: linear-gradient(90deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%);
+  --gradient-card: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+  --border-subtle: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.15);
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
+  --shadow-card-hover: 0 20px 60px rgba(0,0,0,0.4), 0 0 80px rgba(254,49,132,0.1);
+  --shadow-glow-pink: 0 0 60px rgba(254,49,132,0.3);
+  --shadow-glow-orange: 0 0 60px rgba(236,114,17,0.3);
+  --shadow-cta: 0 10px 40px rgba(254,49,132,0.3);
+  --shadow-cta-hover: 0 15px 50px rgba(254,49,132,0.4);
+  --shadow-icon-glow: 0 0 30px rgba(254,49,132,0.3);
+  --radius-sm: 0.375rem; --radius-md: 0.625rem; --radius-lg: 1rem; --radius-xl: 1.5rem; --radius-full: 9999px;
+  --font-display: 'Anton', Impact, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font-body); font-size: 16px; line-height: 1.65; color: rgba(255,255,255,0.60); background: #000; }
+::selection { background: rgba(254,49,132,0.3); color: #fff; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+/* SIDEBAR */
+.sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: var(--dark-900); border-right: 1px solid var(--border-subtle); z-index: 100; display: flex; flex-direction: column; overflow-y: auto; }
+.sidebar-brand { padding: 2rem 1.5rem; border-bottom: 1px solid var(--border-subtle); }
+.sidebar-brand h1 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 400; text-transform: uppercase; color: #fff; line-height: 1; }
+.sidebar-brand p { font-size: 0.75rem; color: rgba(255,255,255,0.40); margin-top: 0.5rem; }
+.sidebar-nav { padding: 1.5rem 0; flex: 1; }
+.sidebar-nav a { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1.5rem; font-size: 0.8125rem; color: rgba(255,255,255,0.50); text-decoration: none; transition: all 0.3s; }
+.sidebar-nav a:hover { color: rgba(255,255,255,0.80); }
+.sidebar-nav a.active { color: #fff; }
+.nav-num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: rgba(254,49,132,0.15); color: var(--brand-pink); font-size: 0.6875rem; font-weight: 600; flex-shrink: 0; transition: all 0.3s; }
+.sidebar-nav a.active .nav-num { background: var(--brand-pink); color: #fff; }
+main { margin-left: 260px; }
+
+/* SECTIONS */
+.section { padding: 5rem 3rem; border-bottom: 1px solid var(--border-subtle); }
+.section-label { display: inline-block; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--brand-pink); margin-bottom: 1.5rem; }
+.section-title { font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; text-transform: uppercase; color: #fff; line-height: 1.05; margin-bottom: 1rem; }
+.section-desc { font-size: 1.0625rem; color: rgba(255,255,255,0.50); max-width: 680px; margin-bottom: 2.5rem; }
+.text-gradient { background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.code-block { background: var(--dark-800); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem 1.25rem; font-family: monospace; font-size: 0.8125rem; color: rgba(255,255,255,0.70); overflow-x: auto; margin-top: 1rem; white-space: pre; line-height: 1.6; }
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* HERO */
+.hero { position: relative; padding: 8rem 3rem 6rem; overflow: hidden; background: #000; }
+.hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(254,49,132,0.15) 0%, transparent 50%), radial-gradient(ellipse 60% 40% at 80% 20%, rgba(255,107,53,0.1) 0%, transparent 50%), radial-gradient(ellipse 50% 30% at 20% 80%, rgba(236,114,17,0.08) 0%, transparent 50%); }
+.hero-content { position: relative; z-index: 1; }
+.hero h1 { font-family: var(--font-display); font-size: clamp(3rem, 6vw, 5rem); font-weight: 400; text-transform: uppercase; color: #fff; line-height: 0.95; margin-bottom: 1rem; }
+.hero .tagline { font-size: 1.25rem; color: rgba(255,255,255,0.60); max-width: 500px; margin-bottom: 2rem; }
+.hero .meta { font-size: 0.75rem; color: rgba(255,255,255,0.30); }
+
+/* COLORS */
+.color-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 3rem; }
+.color-swatch { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-subtle); }
+.color-swatch-preview { height: 120px; }
+.color-swatch-info { padding: 1rem; background: var(--dark-800); }
+.color-swatch-name { font-weight: 600; color: #fff; font-size: 0.9375rem; margin-bottom: 0.25rem; }
+.color-swatch-hex { font-family: monospace; font-size: 0.8125rem; color: rgba(255,255,255,0.50); }
+.dark-scale { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; margin-bottom: 3rem; }
+.dark-chip { height: 80px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; align-items: flex-end; padding: 0.5rem; }
+.dark-chip span { font-family: monospace; font-size: 0.6875rem; color: rgba(255,255,255,0.40); }
+.opacity-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+.opacity-row .lbl { font-family: monospace; font-size: 0.75rem; color: rgba(255,255,255,0.40); width: 140px; flex-shrink: 0; }
+
+/* GRADIENT */
+.gradient-demo { height: 200px; border-radius: var(--radius-xl); margin-bottom: 2rem; }
+.gradient-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+.gradient-card { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-subtle); }
+.gradient-card-preview { height: 100px; }
+.gradient-card-info { padding: 1rem; background: var(--dark-800); }
+.gradient-card-name { font-weight: 600; color: #fff; font-size: 0.875rem; margin-bottom: 0.25rem; }
+.gradient-card-css { font-family: monospace; font-size: 0.75rem; color: rgba(255,255,255,0.40); word-break: break-all; }
+
+/* TYPOGRAPHY */
+.type-row { display: flex; align-items: baseline; gap: 1.5rem; padding: 1rem 0; border-bottom: 1px solid var(--border-subtle); }
+.type-row:last-child { border-bottom: none; }
+.type-label { font-family: monospace; font-size: 0.6875rem; color: rgba(255,255,255,0.40); width: 120px; flex-shrink: 0; }
+.type-pairing { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem; background: var(--gradient-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); }
+.type-pairing h3 { font-family: var(--font-display); font-size: 2rem; font-weight: 400; text-transform: uppercase; color: #fff; line-height: 1.05; margin-bottom: 0.75rem; }
+.type-pairing p { font-size: 0.9375rem; color: rgba(255,255,255,0.60); line-height: 1.7; }
+
+/* BUTTONS */
+.btn-row { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; }
+.btn-primary { display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: var(--gradient-signature); color: #fff; font-family: var(--font-body); font-weight: 600; font-size: 1rem; border: none; border-radius: var(--radius-full); cursor: pointer; box-shadow: var(--shadow-cta); transition: transform 0.3s, box-shadow 0.3s; text-decoration: none; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-cta-hover); }
+.btn-secondary { display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: transparent; color: #fff; font-family: var(--font-body); font-weight: 600; font-size: 1rem; border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-full); cursor: pointer; transition: all 0.3s; text-decoration: none; }
+.btn-secondary:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.4); }
+
+/* CARDS */
+.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.demo-card { position: relative; border-radius: var(--radius-lg); background: var(--gradient-card); border: 1px solid var(--border-subtle); padding: 2rem; overflow: hidden; transition: transform 0.5s, box-shadow 0.5s, border-color 0.4s; cursor: pointer; }
+.demo-card .glow-orb { position: absolute; top: -80px; left: -80px; width: 160px; height: 160px; border-radius: 50%; background: linear-gradient(135deg, rgba(254,49,132,0.4), rgba(236,114,17,0.3)); filter: blur(60px); opacity: 0; transition: opacity 0.7s; pointer-events: none; }
+.demo-card .bottom-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--gradient-signature); transform: scaleX(0); opacity: 0; transition: transform 0.5s, opacity 0.5s; }
+.demo-card .border-glow { position: absolute; inset: 0; border-radius: var(--radius-lg); opacity: 0; transition: opacity 0.5s; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(254,49,132,0.3), 0 0 40px rgba(254,49,132,0.15); }
+.demo-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-card-hover); border-color: var(--border-hover); }
+.demo-card:hover .glow-orb { opacity: 1; }
+.demo-card:hover .bottom-accent { transform: scaleX(1); opacity: 1; }
+.demo-card:hover .border-glow { opacity: 1; }
+.icon-box { width: 56px; height: 56px; border-radius: 12px; background: rgba(254,49,132,0.1); border: 1px solid rgba(254,49,132,0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; transition: all 0.5s; }
+.demo-card:hover .icon-box { border-color: rgba(254,49,132,0.5); box-shadow: var(--shadow-icon-glow); }
+.icon-box svg { width: 28px; height: 28px; color: var(--brand-pink); transition: transform 0.5s; }
+.demo-card:hover .icon-box svg { transform: scale(1.1); }
+.demo-card h3 { font-family: var(--font-display); font-size: 1.25rem; font-weight: 400; text-transform: uppercase; color: #fff; margin-bottom: 0.5rem; line-height: 1.1; }
+.demo-card p { font-size: 0.875rem; color: rgba(255,255,255,0.50); transition: color 0.3s; }
+.demo-card:hover p { color: rgba(255,255,255,0.70); }
+
+/* GLOW */
+.glow-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+.glow-box { position: relative; height: 200px; border-radius: var(--radius-lg); background: var(--dark-800); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.glow-box .lbl { position: absolute; bottom: 1rem; left: 1rem; font-size: 0.75rem; color: rgba(255,255,255,0.40); font-family: monospace; z-index: 1; }
+
+/* BACKGROUNDS */
+.bg-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+.bg-box { height: 160px; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); display: flex; align-items: flex-end; padding: 1rem; position: relative; overflow: hidden; }
+.bg-box .lbl { font-size: 0.75rem; color: rgba(255,255,255,0.50); font-family: monospace; z-index: 1; }
+.bg-grid-pat { background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 60px 60px; }
+
+/* HOVER */
+.hover-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 3rem; }
+.hover-item { padding: 1.5rem; background: var(--dark-800); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); }
+.hover-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(254,49,132,0.15); color: var(--brand-pink); font-size: 0.75rem; font-weight: 700; margin-bottom: 0.75rem; }
+.hover-item h4 { font-weight: 600; color: #fff; font-size: 0.9375rem; margin-bottom: 0.375rem; }
+.hover-item p { font-size: 0.8125rem; color: rgba(255,255,255,0.50); }
+
+/* ANIMATIONS */
+@keyframes revealAnim { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+@keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(254,49,132,0.3); } 50% { box-shadow: 0 0 50px rgba(254,49,132,0.5); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.anim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+.anim-box { height: 140px; border-radius: var(--radius-lg); background: var(--dark-800); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; }
+.anim-box .dot { width: 24px; height: 24px; border-radius: 50%; background: var(--brand-pink); }
+.anim-box .lbl { font-size: 0.75rem; color: rgba(255,255,255,0.40); font-family: monospace; }
+.anim-box.a-reveal .dot { animation: revealAnim 0.8s ease-out infinite; }
+.anim-box.a-fade .dot { animation: fadeIn 1s ease-out infinite; }
+.anim-box.a-float .dot { animation: float 3s ease-in-out infinite; }
+.anim-box.a-pulse .dot { animation: pulseGlow 2s ease-in-out infinite; }
+.anim-box.a-shimmer .dot { width: 80px; height: 24px; border-radius: 12px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); background-size: 200% 100%; animation: shimmer 2s infinite; }
+.delay-demo { display: flex; gap: 1rem; }
+.delay-demo .bar { height: 40px; width: 60px; border-radius: var(--radius-md); background: var(--brand-pink); opacity: 0; animation: revealAnim 0.8s ease-out forwards; }
+.delay-demo .bar:nth-child(1) { animation-delay: 100ms; }
+.delay-demo .bar:nth-child(2) { animation-delay: 200ms; }
+.delay-demo .bar:nth-child(3) { animation-delay: 300ms; }
+.delay-demo .bar:nth-child(4) { animation-delay: 400ms; }
+.delay-demo .bar:nth-child(5) { animation-delay: 500ms; }
+
+/* SPACING */
+.spacing-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+.spacing-row .lbl { font-family: monospace; font-size: 0.75rem; color: rgba(255,255,255,0.40); width: 160px; flex-shrink: 0; }
+.spacing-bar { height: 32px; border-radius: var(--radius-sm); background: rgba(254,49,132,0.15); border: 1px solid rgba(254,49,132,0.2); display: flex; align-items: center; padding: 0 0.75rem; font-size: 0.6875rem; color: rgba(255,255,255,0.50); font-family: monospace; }
+.bp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.bp-card { padding: 1rem; background: var(--dark-800); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); text-align: center; }
+.bp-card .name { font-weight: 600; color: #fff; font-size: 0.875rem; margin-bottom: 0.25rem; }
+.bp-card .val { font-family: monospace; font-size: 0.75rem; color: rgba(255,255,255,0.40); }
+
+/* SHADOWS */
+.shadow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 3rem; }
+.shadow-card { padding: 1.5rem; border-radius: var(--radius-lg); background: var(--dark-700); text-align: center; }
+.shadow-name { font-weight: 600; color: #fff; font-size: 0.875rem; margin-bottom: 0.5rem; }
+.shadow-val { font-family: monospace; font-size: 0.6875rem; color: rgba(255,255,255,0.40); line-height: 1.5; }
+.border-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+.border-box { height: 100px; border-radius: var(--radius-lg); background: var(--dark-800); display: flex; align-items: center; justify-content: center; }
+.border-box span { font-size: 0.75rem; color: rgba(255,255,255,0.40); font-family: monospace; }
+.radius-row { display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-end; }
+.radius-item { text-align: center; }
+.radius-item .box { width: 60px; height: 60px; background: var(--dark-700); border: 1px solid var(--border-subtle); margin-bottom: 0.5rem; }
+.radius-item span { font-family: monospace; font-size: 0.6875rem; color: rgba(255,255,255,0.40); }
+
+/* FOOTER */
+.footer { padding: 3rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+.footer-brand { font-family: var(--font-display); font-size: 1.25rem; font-weight: 400; text-transform: uppercase; color: #fff; }
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .sidebar { display: none; }
+  main { margin-left: 0; }
+  .section, .hero { padding: 3rem 1.5rem; }
+  .color-grid, .card-grid, .hover-grid, .glow-grid, .bg-row, .shadow-grid { grid-template-columns: 1fr; }
+  .gradient-row, .border-row, .bp-grid { grid-template-columns: repeat(2, 1fr); }
+  .dark-scale, .anim-grid { grid-template-columns: repeat(3, 1fr); }
+  .type-pairing { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand"><h1>GRATITUDE</h1><p>Brand System v1.0</p></div>
+  <nav class="sidebar-nav">
+    <a href="#colors"><span class="nav-num">01</span> Colors</a>
+    <a href="#gradient"><span class="nav-num">02</span> The Gradient</a>
+    <a href="#typography"><span class="nav-num">03</span> Typography</a>
+    <a href="#buttons"><span class="nav-num">04</span> Buttons</a>
+    <a href="#cards"><span class="nav-num">05</span> Cards</a>
+    <a href="#glow"><span class="nav-num">06</span> Glow Effects</a>
+    <a href="#backgrounds"><span class="nav-num">07</span> Backgrounds</a>
+    <a href="#hover"><span class="nav-num">08</span> Hover System</a>
+    <a href="#animations"><span class="nav-num">09</span> Animations</a>
+    <a href="#spacing"><span class="nav-num">10</span> Spacing</a>
+    <a href="#shadows"><span class="nav-num">11</span> Shadows</a>
+  </nav>
+</aside>
+
+<main>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <h1>GRATITUDE<br><span class="text-gradient">BRAND SYSTEM</span></h1>
+    <p class="tagline">Gratitude isn't just felt. It's delivered.</p>
+    <p class="meta">Design System v1.0 &middot; February 2026 &middot; Anton + Inter &middot; Dark Theme</p>
+  </div>
+</section>
+
+<!-- 01: COLORS -->
+<section class="section" id="colors">
+  <div class="reveal"><span class="section-label">01 Colors</span>
+    <h2 class="section-title">COLOR SYSTEM</h2>
+    <p class="section-desc">Three signature colors form the gradient. Pure black backgrounds create the void from which glow energy emerges. White text uses an opacity scale for hierarchy.</p>
+  </div>
+  <div class="reveal">
+    <h3 style="font-weight:600;color:#fff;font-size:.9375rem;margin-bottom:1rem;">Primary Palette</h3>
+    <div class="color-grid">
+      <div class="color-swatch"><div class="color-swatch-preview" style="background:#FE3184"></div><div class="color-swatch-info"><div class="color-swatch-name">Pink</div><div class="color-swatch-hex">#FE3184 &middot; rgb(254, 49, 132)</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-preview" style="background:#FF6B35"></div><div class="color-swatch-info"><div class="color-swatch-name">Coral</div><div class="color-swatch-hex">#FF6B35 &middot; rgb(255, 107, 53)</div></div></div>
+      <div class="color-swatch"><div class="color-swatch-preview" style="background:#ec7211"></div><div class="color-swatch-info"><div class="color-swatch-name">Orange</div><div class="color-swatch-hex">#ec7211 &middot; rgb(236, 114, 17)</div></div></div>
+    </div>
+  </div>
+  <div class="reveal">
+    <h3 style="font-weight:600;color:#fff;font-size:.9375rem;margin-bottom:1rem;">Dark Scale</h3>
+    <div class="dark-scale">
+      <div class="dark-chip" style="background:#000"><span>950 #000000</span></div>
+      <div class="dark-chip" style="background:#0a0a0a"><span>900 #0a0a0a</span></div>
+      <div class="dark-chip" style="background:#0d0d0d"><span>800 #0d0d0d</span></div>
+      <div class="dark-chip" style="background:#1a1a1a"><span>700 #1a1a1a</span></div>
+      <div class="dark-chip" style="background:#242424"><span>600 #242424</span></div>
+      <div class="dark-chip" style="background:#2a2a2a"><span>500 #2a2a2a</span></div>
+    </div>
+  </div>
+  <div class="reveal">
+    <h3 style="font-weight:600;color:#fff;font-size:.9375rem;margin-bottom:1rem;">Text Opacity Scale</h3>
+    <div class="opacity-row"><span class="lbl">text-white (1.0)</span><span style="color:rgba(255,255,255,1);font-size:1.125rem">Primary headlines</span></div>
+    <div class="opacity-row"><span class="lbl">text-white/80</span><span style="color:rgba(255,255,255,.80);font-size:1.125rem">Strong emphasis</span></div>
+    <div class="opacity-row"><span class="lbl">text-white/70</span><span style="color:rgba(255,255,255,.70);font-size:1.125rem">Secondary content</span></div>
+    <div class="opacity-row"><span class="lbl">text-white/60</span><span style="color:rgba(255,255,255,.60);font-size:1.125rem">Body text default</span></div>
+    <div class="opacity-row"><span class="lbl">text-white/50</span><span style="color:rgba(255,255,255,.50);font-size:1.125rem">Muted text</span></div>
+    <div class="opacity-row"><span class="lbl">text-white/40</span><span style="color:rgba(255,255,255,.40);font-size:1.125rem">Labels and captions</span></div>
+  </div>
+</section>
+
+<!-- 02: GRADIENT -->
+<section class="section" id="gradient">
+  <div class="reveal"><span class="section-label">02 The Gradient</span>
+    <h2 class="section-title">SIGNATURE <span class="text-gradient">GRADIENT</span></h2>
+    <p class="section-desc">The 3-stop gradient is our most important visual element. Pink to coral to orange, always at 135deg for CTAs and 90deg for text.</p>
+  </div>
+  <div class="reveal">
+    <div class="gradient-demo" style="background:var(--gradient-signature)"></div>
+    <div class="code-block">background: linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%);</div>
+  </div>
+  <div class="reveal" style="margin-top:2.5rem">
+    <div class="gradient-row">
+      <div class="gradient-card"><div class="gradient-card-preview" style="background:var(--gradient-text)"></div><div class="gradient-card-info"><div class="gradient-card-name">Text Gradient</div><div class="gradient-card-css">linear-gradient(90deg, #FE3184, #FF6B35, #ec7211)</div></div></div>
+      <div class="gradient-card"><div class="gradient-card-preview" style="background:radial-gradient(circle at 50% 50%, rgba(254,49,132,0.4) 0%, rgba(254,49,132,0.1) 40%, transparent 70%);background-color:#000"></div><div class="gradient-card-info"><div class="gradient-card-name">Glow Gradient</div><div class="gradient-card-css">radial-gradient(circle, rgba(254,49,132,0.4), transparent)</div></div></div>
+    </div>
+    <div class="gradient-row">
+      <div class="gradient-card"><div class="gradient-card-preview" style="background:var(--gradient-card)"></div><div class="gradient-card-info"><div class="gradient-card-name">Card Gradient</div><div class="gradient-card-css">linear-gradient(180deg, #1a1a1a, #0d0d0d)</div></div></div>
+      <div class="gradient-card"><div class="gradient-card-preview" style="background:radial-gradient(ellipse 80% 50% at 50% 0%, rgba(254,49,132,0.15) 0%, transparent 50%),radial-gradient(ellipse 60% 40% at 80% 20%, rgba(255,107,53,0.1) 0%, transparent 50%);background-color:#000"></div><div class="gradient-card-info"><div class="gradient-card-name">Hero Ambient</div><div class="gradient-card-css">Layered radial glows on black</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 03: TYPOGRAPHY -->
+<section class="section" id="typography">
+  <div class="reveal"><span class="section-label">03 Typography</span>
+    <h2 class="section-title">TYPE SYSTEM</h2>
+    <p class="section-desc">Anton for display headlines (always uppercase, weight 400 only). Inter for everything else (400-700). Never more than two fonts.</p>
+  </div>
+  <div class="reveal">
+    <h3 style="font-weight:600;color:#fff;font-size:.9375rem;margin-bottom:1.5rem">Anton &mdash; Display</h3>
+    <div class="type-row"><span class="type-label">display-2xl 120px</span><span style="font-family:var(--font-display);font-size:72px;text-transform:uppercase;line-height:.95;color:#fff">GRATITUDE</span></div>
+    <div class="type-row"><span class="type-label">display-xl 96px</span><span style="font-family:var(--font-display);font-size:60px;text-transform:uppercase;line-height:.95;color:#fff">DELIVERED</span></div>
+    <div class="type-row"><span class="type-label">display-lg 72px</span><span style="font-family:var(--font-display);font-size:48px;text-transform:uppercase;line-height:1;color:#fff">ACTIVATE IMPACT</span></div>
+    <div class="type-row"><span class="type-label">display 56px</span><span style="font-family:var(--font-display);font-size:40px;text-transform:uppercase;line-height:1.05;color:#fff">SPONSOR GOOD</span></div>
+    <div class="type-row"><span class="type-label">heading 42px</span><span style="font-family:var(--font-display);font-size:32px;text-transform:uppercase;line-height:1.1;color:#fff">HOW IT WORKS</span></div>
+    <div class="type-row"><span class="type-label">heading-sm 32px</span><span style="font-family:var(--font-display);font-size:24px;text-transform:uppercase;line-height:1.15;color:#fff">IMPACT METRICS</span></div>
+  </div>
+  <div class="reveal" style="margin-top:2rem">
+    <h3 style="font-weight:600;color:#fff;font-size:.9375rem;margin-bottom:1.5rem">Inter &mdash; Body & UI</h3>
+    <div class="type-row"><span class="type-label">body-lg 18px</span><span style="font-size:18px;color:rgba(255,255,255,.60)">Companies sponsor meaningful impact, people activate it.</span></div>
+    <div class="type-row"><span class="type-label">body 16px</span><span style="font-size:16px;color:rgba(255,255,255,.60)">Gratitude.com delivers impact into the world instantly and at scale.</span></div>
+    <div class="type-row"><span class="type-label">sm 14px</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,.50)">Every activation is tracked, measured, and reported.</span></div>
+    <div class="type-row"><span class="type-label">xs 12px</span><span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.40)">SECTION LABEL TEXT</span></div>
+  </div>
+  <div class="reveal" style="margin-top:2rem">
+    <h3 style="font-weight:600;color:#fff;font-size:.9375rem;margin-bottom:1rem">Font Pairing</h3>
+    <div class="type-pairing">
+      <div><h3>ACTIVATE GRATITUDE</h3><p style="font-size:.875rem;color:var(--brand-pink);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem">Impact Platform</p><p>Companies sponsor meaningful impact. People activate it through simple acts of gratitude. And Gratitude.com delivers it into the world instantly and at scale.</p></div>
+      <div style="padding-left:2rem;border-left:1px solid var(--border-subtle)"><p style="color:rgba(255,255,255,.40);font-size:.8125rem;margin-bottom:1rem">Anton handles all display text (always uppercase). Inter handles body copy, labels, buttons, and UI. This pairing provides dramatic contrast.</p><div class="code-block" style="font-size:.75rem">font-display: 'Anton', Impact, sans-serif;
+font-body: 'Inter', system-ui, sans-serif;</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 04: BUTTONS -->
+<section class="section" id="buttons">
+  <div class="reveal"><span class="section-label">04 Buttons</span>
+    <h2 class="section-title">BUTTON SYSTEM</h2>
+    <p class="section-desc">Primary gradient pill for the main CTA. Secondary ghost for supporting actions. Both use Inter SemiBold.</p>
+  </div>
+  <div class="reveal">
+    <div class="btn-row">
+      <button class="btn-primary">Activate Now <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></button>
+      <button class="btn-secondary">Learn More <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></button>
+    </div>
+    <div class="code-block">/* Primary CTA */
+background: linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%);
+border-radius: 9999px;
+box-shadow: 0 10px 40px rgba(254, 49, 132, 0.3);
+
+/* Secondary Ghost */
+background: transparent;
+border: 1px solid rgba(255, 255, 255, 0.2);
+border-radius: 9999px;</div>
+  </div>
+</section>
+
+<!-- 05: CARDS -->
+<section class="section" id="cards">
+  <div class="reveal"><span class="section-label">05 Cards</span>
+    <h2 class="section-title">INTERACTIVE CARDS</h2>
+    <p class="section-desc">Cards use a dark gradient background with 6-component hover effects. Hover over the cards below to see all effects in action.</p>
+  </div>
+  <div class="card-grid reveal">
+    <div class="demo-card"><div class="glow-orb"></div><div class="border-glow"></div>
+      <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+      <h3>ACTIVATE</h3><p>Turn gratitude into real acts of good. Every activation is tracked.</p><div class="bottom-accent"></div>
+    </div>
+    <div class="demo-card"><div class="glow-orb"></div><div class="border-glow"></div>
+      <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+      <h3>SPONSOR</h3><p>Companies fund meaningful impact through the platform's model.</p><div class="bottom-accent"></div>
+    </div>
+    <div class="demo-card"><div class="glow-orb"></div><div class="border-glow"></div>
+      <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+      <h3>DELIVER</h3><p>Impact delivered instantly and at scale with documented outcomes.</p><div class="bottom-accent"></div>
+    </div>
+  </div>
+  <div class="reveal" style="margin-top:2rem"><div class="code-block">/* Card base */
+background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+border: 1px solid rgba(255, 255, 255, 0.08);
+border-radius: 1rem;
+
+/* Card hover */
+transform: translateY(-8px);
+box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 80px rgba(254,49,132,0.1);</div></div>
+</section>
+
+<!-- 06: GLOW -->
+<section class="section" id="glow">
+  <div class="reveal"><span class="section-label">06 Glow Effects</span>
+    <h2 class="section-title">GLOW <span class="text-gradient">SYSTEM</span></h2>
+    <p class="section-desc">Glow effects create warmth and depth against the black canvas. Pink is primary; orange is secondary. All glows use rgba with controlled opacity.</p>
+  </div>
+  <div class="glow-grid reveal">
+    <div class="glow-box"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;background:rgba(254,49,132,.30);border-radius:50%;filter:blur(60px)"></div><span class="lbl">Pink Glow &mdash; rgba(254,49,132,0.30)</span></div>
+    <div class="glow-box"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:160px;height:160px;background:rgba(236,114,17,.25);border-radius:50%;filter:blur(50px)"></div><span class="lbl">Orange Glow &mdash; rgba(236,114,17,0.25)</span></div>
+    <div class="glow-box" style="cursor:pointer" onmouseenter="this.querySelector('.ic').style.boxShadow='0 0 30px rgba(254,49,132,0.3)';this.querySelector('.ic').style.borderColor='rgba(254,49,132,0.5)'" onmouseleave="this.querySelector('.ic').style.boxShadow='none';this.querySelector('.ic').style.borderColor='rgba(254,49,132,0.2)'"><div class="ic" style="width:56px;height:56px;border-radius:12px;background:rgba(254,49,132,.1);border:1px solid rgba(254,49,132,.2);display:flex;align-items:center;justify-content:center;transition:all .5s"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FE3184" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg></div><span class="lbl">Icon Glow &mdash; hover</span></div>
+    <div class="glow-box"><div style="position:absolute;inset:20px;border-radius:12px;box-shadow:inset 0 0 0 1px rgba(254,49,132,.3),0 0 40px rgba(254,49,132,.15)"></div><span class="lbl">Border Glow &mdash; inset + outer</span></div>
+  </div>
+</section>
+
+<!-- 07: BACKGROUNDS -->
+<section class="section" id="backgrounds">
+  <div class="reveal"><span class="section-label">07 Backgrounds</span>
+    <h2 class="section-title">BACKGROUND TREATMENTS</h2>
+    <p class="section-desc">Pure black is the default canvas. Layered radial glows create hero atmosphere. The grid pattern adds structural texture.</p>
+  </div>
+  <div class="bg-row reveal">
+    <div class="bg-box" style="background:#000"><span class="lbl">#000000</span></div>
+    <div class="bg-box" style="background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(254,49,132,.15) 0%,transparent 50%),radial-gradient(ellipse 60% 40% at 80% 20%,rgba(255,107,53,.1) 0%,transparent 50%);background-color:#000"><span class="lbl">Hero Glow</span></div>
+    <div class="bg-box bg-grid-pat" style="background-color:#000"><span class="lbl">60px Grid</span></div>
+  </div>
+  <div class="bg-row reveal">
+    <div class="bg-box" style="background:#000"><span class="lbl">950 Base</span></div>
+    <div class="bg-box" style="background:#0a0a0a"><span class="lbl">900 Elevated</span></div>
+    <div class="bg-box" style="background:#1a1a1a"><span class="lbl">700 Card</span></div>
+  </div>
+</section>
+
+<!-- 08: HOVER SYSTEM -->
+<section class="section" id="hover">
+  <div class="reveal"><span class="section-label">08 Hover System</span>
+    <h2 class="section-title">6-COMPONENT <span class="text-gradient">HOVER</span></h2>
+    <p class="section-desc">Every interactive card uses a 6-component hover system. Each component has its own transition duration creating a layered, organic feel.</p>
+  </div>
+  <div class="hover-grid reveal">
+    <div class="hover-item"><div class="hover-num">1</div><h4>Glow Orb</h4><p>Gradient-blurred circle fades in from top-left corner. Pink-to-orange at 40%/30% opacity, 60px blur. 700ms.</p></div>
+    <div class="hover-item"><div class="hover-num">2</div><h4>Text Brightness</h4><p>Body text increases opacity from white/50 to white/70. Creates "coming alive" effect. 300ms.</p></div>
+    <div class="hover-item"><div class="hover-num">3</div><h4>Icon Scale</h4><p>Icon SVG scales to 110% within container. Draws the eye. 500ms.</p></div>
+    <div class="hover-item"><div class="hover-num">4</div><h4>Icon Glow</h4><p>Container gets pink glow shadow and border strengthens to pink/50%. 500ms.</p></div>
+    <div class="hover-item"><div class="hover-num">5</div><h4>Bottom Accent</h4><p>4px gradient line scales from center to full width at card bottom. 500ms.</p></div>
+    <div class="hover-item"><div class="hover-num">6</div><h4>Border Glow</h4><p>Inset 1px border at pink/30% plus outer glow at 40px. 500ms.</p></div>
+  </div>
+  <div class="reveal">
+    <h3 style="font-weight:600;color:#fff;font-size:.9375rem;margin-bottom:1rem">Live Demo</h3>
+    <div style="max-width:400px">
+      <div class="demo-card"><div class="glow-orb"></div><div class="border-glow"></div>
+        <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <h3>ALL SIX EFFECTS</h3><p>Hover to see glow orb, text brightness, icon scale, icon glow, bottom accent, and border glow.</p><div class="bottom-accent"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09: ANIMATIONS -->
+<section class="section" id="animations">
+  <div class="reveal"><span class="section-label">09 Animations</span>
+    <h2 class="section-title">ANIMATION SYSTEM</h2>
+    <p class="section-desc">Five core animations plus stagger delay utilities. All animations are subtle and purposeful.</p>
+  </div>
+  <div class="anim-grid reveal">
+    <div class="anim-box a-reveal"><div class="dot"></div><span class="lbl">reveal 0.8s</span></div>
+    <div class="anim-box a-fade"><div class="dot"></div><span class="lbl">fade-in 1s</span></div>
+    <div class="anim-box a-float"><div class="dot"></div><span class="lbl">float 6s</span></div>
+    <div class="anim-box a-pulse"><div class="dot"></div><span class="lbl">pulse-glow 2s</span></div>
+    <div class="anim-box a-shimmer"><div class="dot"></div><span class="lbl">shimmer 2s</span></div>
+    <div class="anim-box"><div class="delay-demo"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div><span class="lbl">delay-100..500</span></div>
+  </div>
+  <div class="reveal"><div class="code-block">/* Transition durations */
+Fast (borders, colors):   300ms
+Medium (transforms):       500ms
+Slow (glows, blurs):       700ms
+
+/* Delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }</div></div>
+</section>
+
+<!-- 10: SPACING -->
+<section class="section" id="spacing">
+  <div class="reveal"><span class="section-label">10 Spacing & Layout</span>
+    <h2 class="section-title">SPATIAL SYSTEM</h2>
+    <p class="section-desc">Section padding, container width, and responsive breakpoints. Mobile-first with Tailwind utility classes.</p>
+  </div>
+  <div class="reveal">
+    <div class="spacing-row"><span class="lbl">Section padding</span><div class="spacing-bar" style="width:80%">py-24 lg:py-32 (6rem / 8rem)</div></div>
+    <div class="spacing-row"><span class="lbl">Container</span><div class="spacing-bar" style="width:65%">max-w-[1200px] mx-auto px-5</div></div>
+    <div class="spacing-row"><span class="lbl">Component gap</span><div class="spacing-bar" style="width:40%">2rem to 4rem</div></div>
+    <div class="spacing-row"><span class="lbl">Element gap</span><div class="spacing-bar" style="width:20%">1rem to 1.5rem</div></div>
+    <div class="spacing-row"><span class="lbl">Card padding</span><div class="spacing-bar" style="width:30%">p-8 lg:p-10</div></div>
+  </div>
+  <div class="reveal" style="margin-top:2rem">
+    <h3 style="font-weight:600;color:#fff;font-size:.9375rem;margin-bottom:1rem">Breakpoints</h3>
+    <div class="bp-grid">
+      <div class="bp-card"><div class="name">Mobile</div><div class="val">&lt; 768px</div></div>
+      <div class="bp-card"><div class="name">Tablet</div><div class="val">&ge; 768px</div></div>
+      <div class="bp-card"><div class="name">Desktop</div><div class="val">&ge; 1024px</div></div>
+      <div class="bp-card"><div class="name">Wide</div><div class="val">&ge; 1280px</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11: SHADOWS -->
+<section class="section" id="shadows">
+  <div class="reveal"><span class="section-label">11 Shadows & Borders</span>
+    <h2 class="section-title">ELEVATION SYSTEM</h2>
+    <p class="section-desc">Pink-tinted shadows create warmth on dark backgrounds. Standard box-shadows disappear on black; our system uses colored glows.</p>
+  </div>
+  <div class="shadow-grid reveal">
+    <div class="shadow-card" style="box-shadow:var(--shadow-card)"><div class="shadow-name">Card</div><div class="shadow-val">0 4px 24px rgba(0,0,0,0.3)</div></div>
+    <div class="shadow-card" style="box-shadow:var(--shadow-card-hover)"><div class="shadow-name">Card Hover</div><div class="shadow-val">0 20px 60px rgba(0,0,0,0.4), 0 0 80px rgba(254,49,132,0.1)</div></div>
+    <div class="shadow-card" style="box-shadow:var(--shadow-glow-pink)"><div class="shadow-name">Glow Pink</div><div class="shadow-val">0 0 60px rgba(254,49,132,0.3)</div></div>
+    <div class="shadow-card" style="box-shadow:var(--shadow-glow-orange)"><div class="shadow-name">Glow Orange</div><div class="shadow-val">0 0 60px rgba(236,114,17,0.3)</div></div>
+    <div class="shadow-card" style="box-shadow:var(--shadow-cta)"><div class="shadow-name">CTA</div><div class="shadow-val">0 10px 40px rgba(254,49,132,0.3)</div></div>
+    <div class="shadow-card" style="box-shadow:var(--shadow-icon-glow)"><div class="shadow-name">Icon Glow</div><div class="shadow-val">0 0 30px rgba(254,49,132,0.3)</div></div>
+  </div>
+  <div class="reveal">
+    <h3 style="font-weight:600;color:#fff;font-size:.9375rem;margin-bottom:1rem">Border Patterns</h3>
+    <div class="border-row">
+      <div class="border-box" style="border:1px solid rgba(255,255,255,.08)"><span>subtle .08</span></div>
+      <div class="border-box" style="border:1px solid rgba(255,255,255,.15)"><span>hover .15</span></div>
+      <div class="border-box" style="border:1px solid rgba(254,49,132,.3)"><span>accent pink</span></div>
+      <div class="border-box" style="border:1px solid transparent;background:linear-gradient(#0d0d0d,#0d0d0d) padding-box,linear-gradient(135deg,rgba(254,49,132,.5),transparent 50%,rgba(236,114,17,.3)) border-box"><span>gradient</span></div>
+    </div>
+  </div>
+  <div class="reveal" style="margin-top:2rem">
+    <h3 style="font-weight:600;color:#fff;font-size:.9375rem;margin-bottom:1rem">Border Radius</h3>
+    <div class="radius-row">
+      <div class="radius-item"><div class="box" style="border-radius:var(--radius-sm)"></div><span>sm 6px</span></div>
+      <div class="radius-item"><div class="box" style="border-radius:var(--radius-md)"></div><span>md 10px</span></div>
+      <div class="radius-item"><div class="box" style="border-radius:var(--radius-lg)"></div><span>lg 16px</span></div>
+      <div class="radius-item"><div class="box" style="border-radius:var(--radius-xl)"></div><span>xl 24px</span></div>
+      <div class="radius-item"><div class="box" style="border-radius:var(--radius-full)"></div><span>full pill</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div><div class="footer-brand">GRATITUDE.COM</div><div style="font-size:.75rem;color:rgba(255,255,255,.30);margin-top:.25rem">Brand System v1.0 &middot; February 2026</div></div>
+  <div style="font-size:.75rem;color:rgba(255,255,255,.30);text-align:right"><div>Built for Claude Code agents</div><div style="margin-top:.25rem">Gratitude.com. All rights reserved.</div></div>
+</div>
+
+</main>
+
+<script>
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver(e=>{e.forEach(t=>{if(t.isIntersecting)t.target.classList.add('visible')})},{threshold:0.1,rootMargin:'-40px'});
+reveals.forEach(el=>observer.observe(el));
+const sections=document.querySelectorAll('section[id]');
+const navLinks=document.querySelectorAll('.sidebar-nav a');
+const navObs=new IntersectionObserver(e=>{e.forEach(t=>{if(t.isIntersecting){navLinks.forEach(l=>{l.classList.remove('active');if(l.getAttribute('href')==='#'+t.target.id)l.classList.add('active')})}})},{threshold:0.2,rootMargin:'-100px 0px -60% 0px'});
+sections.forEach(s=>navObs.observe(s));
+</script>
+</body>
+</html>

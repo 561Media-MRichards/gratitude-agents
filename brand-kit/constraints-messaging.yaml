@@ -1,0 +1,24 @@
+chunk_id: "constraints-messaging"
+domain: "guardrails"
+status: "active"
+
+never_claim:
+  - "We solve world hunger" or any grandiose impact claim without data
+  - "Guaranteed ROI" on social impact
+  - Specific impact numbers we cannot verify
+  - That we replace traditional philanthropy entirely
+
+never_sound_like:
+  - A charity asking for donations
+  - A tech startup overhyping an unproven model
+  - A corporate CSR press release with no substance
+  - A wellness brand being vague about "gratitude"
+
+tone_guardrails:
+  - Never be sycophantic in sponsor communications
+  - Never send a deliverable without a clear next step
+  - Never use passive voice in CTAs
+  - No filler openers in emails ("Hope this finds you well")
+  - Never diminish gratitude as a concept — treat it with genuine respect
+  - Avoid "charity" framing — this is activation, not charity
+  - Never make activators feel guilted into action — inspire, don't guilt

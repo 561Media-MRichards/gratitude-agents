@@ -1,0 +1,171 @@
+# Platform dimensions and safe zones for social media graphics
+# Reference: design-kit/platform-specs.yaml
+
+platforms:
+
+  instagram:
+    post_square:
+      width: 1080
+      height: 1080
+      safe_zone: { top: 60, bottom: 60, left: 60, right: 60 }
+      format: "png"
+      notes: "Default Instagram post. Logo bottom-right, 80px from edges."
+
+    post_portrait:
+      width: 1080
+      height: 1350
+      safe_zone: { top: 60, bottom: 120, left: 60, right: 60 }
+      format: "png"
+      notes: "Better engagement than square. Extra bottom space for caption overlap."
+
+    story:
+      width: 1080
+      height: 1920
+      safe_zone: { top: 200, bottom: 280, left: 60, right: 60 }
+      format: "png"
+      notes: "Top 200px reserved for username bar. Bottom 280px for swipe-up/link area."
+
+    carousel:
+      width: 1080
+      height: 1080
+      safe_zone: { top: 60, bottom: 60, left: 60, right: 60 }
+      format: "png"
+      max_slides: 10
+      notes: "Each slide is a separate PNG. Slide 1 = hook. Last slide = CTA."
+
+    reel_cover:
+      width: 1080
+      height: 1920
+      safe_zone: { top: 200, bottom: 340, left: 60, right: 60 }
+      format: "png"
+      notes: "Bottom 340px hidden in grid view. Keep key info in center."
+
+  linkedin:
+    post_landscape:
+      width: 1200
+      height: 627
+      safe_zone: { top: 40, bottom: 40, left: 40, right: 40 }
+      format: "png"
+      notes: "Standard LinkedIn image post and banner format."
+
+    post_square:
+      width: 1080
+      height: 1080
+      safe_zone: { top: 60, bottom: 60, left: 60, right: 60 }
+      format: "png"
+      notes: "Square posts also work on LinkedIn. Good for carousel-style."
+
+    carousel:
+      width: 1080
+      height: 1080
+      safe_zone: { top: 60, bottom: 60, left: 60, right: 60 }
+      format: "pdf"
+      max_slides: 20
+      notes: "LinkedIn carousels are uploaded as PDF documents."
+
+    company_banner:
+      width: 1128
+      height: 191
+      safe_zone: { top: 10, bottom: 10, left: 200, right: 40 }
+      format: "png"
+      notes: "Left 200px may be covered by company logo on some screens."
+
+  facebook:
+    post:
+      width: 1200
+      height: 630
+      safe_zone: { top: 40, bottom: 40, left: 40, right: 40 }
+      format: "png"
+
+    story:
+      width: 1080
+      height: 1920
+      safe_zone: { top: 200, bottom: 280, left: 60, right: 60 }
+      format: "png"
+
+    cover:
+      width: 820
+      height: 312
+      safe_zone: { top: 20, bottom: 20, left: 200, right: 20 }
+      format: "png"
+      notes: "Profile photo overlaps left side on desktop."
+
+  twitter_x:
+    post:
+      width: 1200
+      height: 675
+      safe_zone: { top: 30, bottom: 30, left: 30, right: 30 }
+      format: "png"
+      notes: "16:9 ratio. Images are cropped in feed, shown full on click."
+
+    header:
+      width: 1500
+      height: 500
+      safe_zone: { top: 20, bottom: 20, left: 20, right: 20 }
+      format: "png"
+
+  youtube:
+    thumbnail:
+      width: 1280
+      height: 720
+      safe_zone: { top: 40, bottom: 80, left: 40, right: 120 }
+      format: "png"
+      notes: "Bottom-right 120px has timestamp overlay. High contrast text."
+
+  email:
+    header:
+      width: 600
+      height: 200
+      safe_zone: { top: 20, bottom: 20, left: 20, right: 20 }
+      format: "png"
+      max_file_size_kb: 100
+      notes: "Optimize for email. Keep under 100KB. 600px wide standard."
+
+    hero:
+      width: 600
+      height: 250
+      safe_zone: { top: 20, bottom: 20, left: 20, right: 20 }
+      format: "png"
+      max_file_size_kb: 150
+
+  og_image:
+    standard:
+      width: 1200
+      height: 630
+      safe_zone: { top: 40, bottom: 40, left: 40, right: 40 }
+      format: "png"
+      notes: "Open Graph image for link previews. Keep text large and centered."
+
+  presentation:
+    slide_16_9:
+      width: 1920
+      height: 1080
+      safe_zone: { top: 80, bottom: 80, left: 80, right: 80 }
+      format: "png"
+      notes: "Standard HD presentation slide."
+
+    slide_4_3:
+      width: 1024
+      height: 768
+      safe_zone: { top: 60, bottom: 60, left: 60, right: 60 }
+      format: "png"
+
+  pdf:
+    letter:
+      width: 612
+      height: 792
+      unit: "points"
+      notes: "US Letter (8.5 x 11 inches at 72ppi). Standard for proposals/reports."
+
+    a4:
+      width: 595
+      height: 842
+      unit: "points"
+
+brand_placement:
+  logo_position: "bottom-right"
+  logo_margin: 40
+  logo_max_width: 120
+  logo_variant_dark_bg: "logos/gratitude-logo-white.png"
+  logo_variant_light_bg: "logos/gratitude-logo-color.png"
+  logo_variant_social: "logos/gratitude-logo-white.png"

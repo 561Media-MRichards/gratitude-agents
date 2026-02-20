@@ -1,0 +1,89 @@
+chunk_id: "terminology"
+domain: "voice"
+category: "vocabulary"
+status: "active"
+
+# Gratitude.com Terminology Guide
+# Canonical terms and their incorrect alternatives
+
+preferred_terms:
+  - term: "Gratitude.com"
+    never: ["gratitude.com", "Gratitude", "gratitude"]
+    note: "Always include .com in formal references. Capitalize G."
+
+  - term: "activate"
+    never: ["donate", "give", "contribute"]
+    note: "People activate gratitude, they don't donate through it."
+
+  - term: "sponsor"
+    never: ["donate", "fund", "pay for"]
+    note: "Companies sponsor impact. Sponsorship, not donation."
+
+  - term: "activator"
+    never: ["donor", "user", "participant"]
+    note: "People who activate gratitude are activators."
+
+  - term: "impact"
+    never: ["charity", "giving", "philanthropy"]
+    note: "We deliver impact, not charity."
+
+  - term: "delivered"
+    never: ["distributed", "allocated", "dispersed"]
+    note: "Impact is delivered. Gratitude is delivered. Active verb."
+
+  - term: "activation"
+    never: ["transaction", "donation", "contribution"]
+    note: "Each act of gratitude is an activation."
+
+  - term: "impact partner"
+    never: ["charity", "nonprofit recipient", "beneficiary"]
+    note: "Nonprofits are impact partners, not passive recipients."
+
+  - term: "sponsor kit"
+    never: ["media kit", "pitch deck"]
+    note: "Materials for potential sponsors."
+
+  - term: "impact report"
+    never: ["annual report", "donation receipt"]
+    note: "Reporting on delivered impact."
+
+word_replacements:
+  leverage: "use"
+  utilize: "use"
+  synergies: "working together"
+  holistic: "complete"
+  bespoke: "custom"
+  impactful: "effective"
+  cutting-edge: "modern"
+  innovative: "new"
+  robust: "strong"
+  seamless: "smooth"
+  scalable: "built to grow"
+  ecosystem: "platform"
+  paradigm: "approach"
+  disruptive: "different"
+  granular: "detailed"
+  actionable: "useful"
+  deliverables: "work product"
+  bandwidth: "capacity"
+  circle back: "follow up"
+  touch base: "connect"
+  deep dive: "detailed look"
+  low-hanging fruit: "quick wins"
+  move the needle: "make a difference"
+  thought leadership: "expert content"
+  value-add: "benefit"
+  give back: "activate impact"
+  do good: "deliver impact"
+  make a donation: "activate gratitude"
+
+platform_terms:
+  - "activation"
+  - "sponsor"
+  - "activator"
+  - "impact partner"
+  - "delivered impact"
+  - "impact report"
+  - "sponsor kit"
+  - "activation campaign"
+  note: "These terms define the Gratitude.com platform model. Use them consistently."

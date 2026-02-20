@@ -1,0 +1,193 @@
+# Template Registry — Maps deliverable types to design approaches
+# Reference: design-kit/template-registry.yaml
+
+deliverable_types:
+
+  social_post:
+    description: "Single social media graphic"
+    skill: "social-creative"
+    philosophy: "activation-energy"
+    platform_spec_key: "instagram.post_square"
+    required_elements:
+      - headline_text
+      - brand_logo
+      - brand_colors
+    optional_elements:
+      - stat_callout
+      - cta_text
+      - background_glow
+
+  social_carousel:
+    description: "Multi-slide carousel for Instagram or LinkedIn"
+    skill: "social-creative"
+    philosophy: "activation-energy"
+    platform_spec_key: "instagram.carousel"
+    required_elements:
+      - hook_slide
+      - content_slides
+      - cta_slide
+      - brand_logo
+    slide_structure:
+      slide_1: "Hook — bold question or statement in Anton, gradient text"
+      slides_2_to_n: "One point per slide with numbered indicator"
+      final_slide: "CTA with full gradient background"
+
+  social_story:
+    description: "Instagram or Facebook story graphic"
+    skill: "social-creative"
+    philosophy: "activation-energy"
+    platform_spec_key: "instagram.story"
+    required_elements:
+      - headline_text
+      - brand_logo
+    notes: "Account for interactive element zones (polls, links, Q&A)"
+
+  linkedin_banner:
+    description: "LinkedIn post or company banner image"
+    skill: "social-creative"
+    philosophy: "radiant-warmth"
+    platform_spec_key: "linkedin.post_landscape"
+    required_elements:
+      - headline_text
+      - brand_logo
+      - brand_colors
+
+  impact_report:
+    description: "Multi-page impact report PDF showing activation results"
+    skill: "deliverable-design"
+    philosophy: "impact-evidence"
+    platform_spec_key: "pdf.letter"
+    required_elements:
+      - cover_page
+      - kpi_dashboard_page
+      - activation_metrics
+      - impact_stories
+      - brand_logo
+    page_structure:
+      page_1: "Cover — report title, period, Gratitude logo, glow design"
+      page_2: "Executive summary / key metrics at a glance"
+      pages_3_to_n: "Detailed metrics, activation data, impact stories"
+      final_page: "Next steps + partner contact info"
+
+  sponsor_kit:
+    description: "Sponsor acquisition deck / kit"
+    skill: "deliverable-design"
+    philosophy: "delivered-grace"
+    platform_spec_key: "pdf.letter"
+    required_elements:
+      - cover_page
+      - platform_overview
+      - sponsor_benefits
+      - activation_model
+      - pricing_tiers
+      - brand_logo
+    page_structure:
+      page_1: "Cover — 'Sponsor Kit', Gratitude logo, tagline"
+      page_2: "Platform overview — how Gratitude.com works"
+      page_3: "Why sponsor — benefits and ROI"
+      pages_4_to_n: "Sponsorship tiers, activation examples, case studies"
+      final_page: "Next steps + contact info"
+
+  partner_deck:
+    description: "Nonprofit partner onboarding deck"
+    skill: "deliverable-design"
+    philosophy: "delivered-grace"
+    platform_spec_key: "pdf.letter"
+    required_elements:
+      - cover_page
+      - partnership_model
+      - impact_potential
+      - onboarding_process
+      - brand_logo
+
+  activation_campaign:
+    description: "Multi-asset activation campaign materials"
+    skill: "social-creative"
+    philosophy: "activation-energy"
+    notes: "Generates coordinated set: social posts, stories, banner"
+
+  case_study:
+    description: "Sponsor or partner case study"
+    skill: "deliverable-design"
+    philosophy: "impact-evidence"
+    platform_spec_key: "pdf.letter"
+    required_elements:
+      - cover_page
+      - challenge_section
+      - activation_approach
+      - results_section
+      - stat_callouts
+      - brand_logo
+
+  lead_magnet_pdf:
+    description: "Downloadable PDF lead magnet (guide, playbook)"
+    skill: "deliverable-design"
+    philosophy: "delivered-grace"
+    platform_spec_key: "pdf.letter"
+    required_elements:
+      - cover_page
+      - content_pages
+      - cta_page
+      - brand_logo
+
+  landing_page_mockup:
+    description: "Static visual mockup of a landing page with full hover system"
+    skill: "web-mockup"
+    philosophy: "radiant-warmth"
+    dimensions:
+      width: 1440
+      height: "variable"
+    required_elements:
+      - hero_section
+      - headline
+      - cta_button
+      - brand_colors
+      - brand_fonts
+      - hover_system
+
+  email_header:
+    description: "Email header or hero image"
+    skill: "brand-asset-design"
+    philosophy: "luminous-silence"
+    platform_spec_key: "email.header"
+    required_elements:
+      - brand_logo
+      - brand_colors
+
+  og_image:
+    description: "Open Graph image for link previews"
+    skill: "brand-asset-design"
+    philosophy: "radiant-warmth"
+    platform_spec_key: "og_image.standard"
+    required_elements:
+      - page_title
+      - brand_logo
+      - brand_colors
+
+  presentation_slide:
+    description: "Presentation slide deck"
+    skill: "brand-asset-design"
+    philosophy: "delivered-grace"
+    platform_spec_key: "presentation.slide_16_9"
+    required_elements:
+      - slide_title
+      - brand_logo
+      - brand_colors
+
+  hero_art:
+    description: "Abstract hero background or campaign key visual"
+    skill: "canvas-art"
+    philosophy: "varies"
+    dimensions:
+      width: 1920
+      height: 1080
+    notes: "Philosophy determined per piece. Two-phase: philosophy creation then expression."
+
+  campaign_key_art:
+    description: "Campaign visual identity piece"
+    skill: "canvas-art"
+    philosophy: "varies"
+    dimensions:
+      width: 1920
+      height: 1080
+    notes: "Abstract artistic compositions. Brand glow aesthetic required."
