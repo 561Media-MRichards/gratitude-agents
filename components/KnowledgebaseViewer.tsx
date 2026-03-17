@@ -12,6 +12,14 @@ interface KBEntry {
   createdAt: string;
 }
 
+interface FormData {
+  agentId: string;
+  category: string;
+  title: string;
+  content: string;
+  tags: string;
+}
+
 const CATEGORIES = [
   "all",
   "campaign_result",
@@ -22,6 +30,8 @@ const CATEGORIES = [
   "general",
 ];
 
+const EDIT_CATEGORIES = CATEGORIES.filter((c) => c !== "all");
+
 const CATEGORY_COLORS: Record<string, string> = {
   campaign_result: "#FE3184",
   sponsor_info: "#FF6B35",
@@ -31,20 +41,53 @@ const CATEGORY_COLORS: Record<string, string> = {
   general: "#888",
 };
 
+const AGENTS = [
+  "orchestrator",
+  "brand-voice",
+  "content-atomizer",
+  "direct-response-copy",
+  "email-sequences",
+  "gratitude-content-strategy",
+  "lead-magnet",
+  "newsletter",
+  "positioning-angles",
+  "social-creative",
+  "deliverable-design",
+  "web-mockup",
+  "brand-asset-design",
+  "canvas-art",
+];
+
+const EMPTY_FORM: FormData = {
+  agentId: "orchestrator",
+  category: "general",
+  title: "",
+  content: "",
+  tags: "",
+};
+
 export default function KnowledgebaseViewer() {
   const [entries, setEntries] = useState<KBEntry[]>([]);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<FormData>(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    fetchEntries();
+  }, []);
+
+  function fetchEntries() {
     fetch("/api/knowledgebase")
       .then((r) => r.json())
       .then((data) => {
         setEntries(data);
         setLoading(false);
       });
-  }, []);
+  }
 
   const filtered = entries.filter((e) => {
     if (filter !== "all" && e.category !== filter) return false;
@@ -60,8 +103,70 @@ export default function KnowledgebaseViewer() {
   });
 
   async function handleDelete(id: string) {
+    if (!confirm("Delete this entry?")) return;
     await fetch(`/api/knowledgebase/${id}`, { method: "DELETE" });
     setEntries((prev) => prev.filter((e) => e.id !== id));
+  }
+
+  function openCreate() {
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+    setModalOpen(true);
+  }
+
+  function openEdit(entry: KBEntry) {
+    setEditingId(entry.id);
+    setForm({
+      agentId: entry.agentId,
+      category: entry.category,
+      title: entry.title,
+      content: entry.content,
+      tags: entry.tags?.join(", ") || "",
+    });
+    setModalOpen(true);
+  }
+
+  async function handleSave() {
+    if (!form.title.trim() || !form.content.trim()) return;
+    setSaving(true);
+
+    const payload = {
+      agentId: form.agentId,
+      category: form.category,
+      title: form.title.trim(),
+      content: form.content.trim(),
+      tags: form.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean),
+    };
+
+    try {
+      if (editingId) {
+        const res = await fetch(`/api/knowledgebase/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const updated = await res.json();
+        setEntries((prev) =>
+          prev.map((e) => (e.id === editingId ? updated : e))
+        );
+      } else {
+        const res = await fetch("/api/knowledgebase", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const created = await res.json();
+        setEntries((prev) => [created, ...prev]);
+      }
+      setModalOpen(false);
+    } catch (err) {
+      console.error("Save failed:", err);
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (loading) {
@@ -74,8 +179,8 @@ export default function KnowledgebaseViewer() {
 
   return (
     <div>
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
+      {/* Toolbar */}
+      <div className="flex flex-wrap gap-3 mb-6 items-center">
         <input
           type="text"
           value={search}
@@ -98,6 +203,17 @@ export default function KnowledgebaseViewer() {
             </button>
           ))}
         </div>
+        <button
+          onClick={openCreate}
+          className="ml-auto px-4 py-2 rounded-full text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
+          style={{
+            background:
+              "linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)",
+            boxShadow: "0 8px 30px rgba(254, 49, 132, 0.25)",
+          }}
+        >
+          + Add Entry
+        </button>
       </div>
 
       {/* Grid */}
@@ -105,7 +221,7 @@ export default function KnowledgebaseViewer() {
         <div className="text-center py-16">
           <p className="text-white/30 text-sm">
             {entries.length === 0
-              ? "No learnings yet. They'll appear automatically after conversations reach 4+ messages."
+              ? "No learnings yet. Click \"+ Add Entry\" to create one, or they'll appear automatically after conversations reach 4+ messages."
               : "No results match your filters."}
           </p>
         </div>
@@ -114,7 +230,8 @@ export default function KnowledgebaseViewer() {
           {filtered.map((entry) => (
             <div
               key={entry.id}
-              className="p-4 rounded-xl border border-white/[0.06] bg-dark-800 hover:border-white/[0.12] transition-all group"
+              className="p-4 rounded-xl border border-white/[0.06] bg-dark-800 hover:border-white/[0.12] transition-all group cursor-pointer"
+              onClick={() => openEdit(entry)}
             >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <span
@@ -128,7 +245,10 @@ export default function KnowledgebaseViewer() {
                   {entry.category.replace(/_/g, " ")}
                 </span>
                 <button
-                  onClick={() => handleDelete(entry.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(entry.id);
+                  }}
                   className="text-white/20 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all text-xs"
                 >
                   &#x2715;
@@ -138,7 +258,7 @@ export default function KnowledgebaseViewer() {
               <h3 className="text-sm font-semibold text-white/85 mb-1.5">
                 {entry.title}
               </h3>
-              <p className="text-[13px] text-white/50 leading-relaxed mb-3">
+              <p className="text-[13px] text-white/50 leading-relaxed mb-3 line-clamp-4">
                 {entry.content}
               </p>
 
@@ -153,12 +273,168 @@ export default function KnowledgebaseViewer() {
                 ))}
               </div>
 
-              <div className="mt-3 text-[10px] text-white/20">
-                {entry.agentId} &middot;{" "}
-                {new Date(entry.createdAt).toLocaleDateString()}
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-[10px] text-white/20">
+                  {entry.agentId} &middot;{" "}
+                  {new Date(entry.createdAt).toLocaleDateString()}
+                </span>
+                <span className="text-[10px] text-white/20 opacity-0 group-hover:opacity-100 transition-all">
+                  Click to edit
+                </span>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Create/Edit Modal */}
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0, 0, 0, 0.7)", backdropFilter: "blur(4px)" }}
+          onClick={() => setModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl p-6 space-y-5"
+            style={{
+              background: "linear-gradient(180deg, rgba(26, 26, 26, 0.98) 0%, rgba(13, 13, 13, 0.98) 100%)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5), 0 0 80px rgba(254, 49, 132, 0.08)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-display text-xl uppercase text-gradient">
+              {editingId ? "EDIT ENTRY" : "ADD ENTRY"}
+            </h2>
+
+            {/* Title */}
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-white/40 mb-1.5">
+                Title
+              </label>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="Concise title for this learning"
+                className="w-full px-4 py-3 rounded-xl text-[14px] text-white placeholder:text-white/25 focus:outline-none transition-all"
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                }}
+                autoFocus
+              />
+            </div>
+
+            {/* Content */}
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-white/40 mb-1.5">
+                Content
+              </label>
+              <textarea
+                value={form.content}
+                onChange={(e) => setForm({ ...form, content: e.target.value })}
+                placeholder="Detailed description of the learning (2-4 sentences)"
+                rows={4}
+                className="w-full px-4 py-3 rounded-xl text-[14px] text-white placeholder:text-white/25 focus:outline-none transition-all resize-none"
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                }}
+              />
+            </div>
+
+            {/* Category + Agent row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-white/40 mb-1.5">
+                  Category
+                </label>
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl text-[14px] text-white focus:outline-none appearance-none cursor-pointer"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                  }}
+                >
+                  {EDIT_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat} className="bg-dark-800">
+                      {cat.replace(/_/g, " ")}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-white/40 mb-1.5">
+                  Agent
+                </label>
+                <select
+                  value={form.agentId}
+                  onChange={(e) => setForm({ ...form, agentId: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl text-[14px] text-white focus:outline-none appearance-none cursor-pointer"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                  }}
+                >
+                  {AGENTS.map((a) => (
+                    <option key={a} value={a} className="bg-dark-800">
+                      {a}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-white/40 mb-1.5">
+                Tags
+                <span className="text-white/20 normal-case tracking-normal font-normal ml-1">
+                  (comma separated)
+                </span>
+              </label>
+              <input
+                type="text"
+                value={form.tags}
+                onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                placeholder="positioning, voice, strategy"
+                className="w-full px-4 py-3 rounded-xl text-[14px] text-white placeholder:text-white/25 focus:outline-none transition-all"
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                }}
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setModalOpen(false)}
+                className="flex-1 py-3 rounded-full text-sm font-medium text-white/60 border border-white/[0.1] hover:border-white/[0.2] hover:text-white/80 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !form.title.trim() || !form.content.trim()}
+                className="flex-1 py-3 rounded-full text-sm font-semibold text-white transition-all disabled:opacity-40 hover:-translate-y-0.5"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)",
+                  boxShadow: "0 8px 30px rgba(254, 49, 132, 0.25)",
+                }}
+              >
+                {saving
+                  ? "Saving..."
+                  : editingId
+                    ? "Save Changes"
+                    : "Add Entry"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

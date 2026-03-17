@@ -20,6 +20,33 @@ export async function GET(
   return NextResponse.json(entry);
 }
 
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const body = await request.json();
+  const { agentId, category, title, content, tags } = body;
+
+  const [updated] = await db
+    .update(knowledgebaseEntries)
+    .set({
+      ...(agentId && { agentId }),
+      ...(category && { category }),
+      ...(title && { title }),
+      ...(content && { content }),
+      ...(tags && { tags }),
+    })
+    .where(eq(knowledgebaseEntries.id, id))
+    .returning();
+
+  if (!updated) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(updated);
+}
+
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
