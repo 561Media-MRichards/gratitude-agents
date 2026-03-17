@@ -1,0 +1,225 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-pink: #FE3184;
+  --color-brand-coral: #FF6B35;
+  --color-brand-orange: #ec7211;
+  --color-brand-pink-400: #FF4D8D;
+  --color-brand-pink-600: #E82878;
+  --color-brand-coral-400: #FF8C5A;
+  --color-brand-coral-600: #E85A2A;
+
+  --color-dark-950: #000000;
+  --color-dark-900: #0a0a0a;
+  --color-dark-800: #0d0d0d;
+  --color-dark-700: #1a1a1a;
+  --color-dark-600: #242424;
+  --color-dark-500: #2a2a2a;
+
+  --font-display: "Anton", Impact, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
+}
+
+/* Gradient text utility */
+.text-gradient {
+  background: linear-gradient(90deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gradient border utility */
+.border-gradient {
+  position: relative;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+.border-gradient::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(254, 49, 132, 0.5), transparent 50%, rgba(236, 114, 17, 0.3));
+  z-index: -1;
+}
+
+/* Background grid from gratitude.com */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Hero gradient ambient layers */
+.hero-gradient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(254, 49, 132, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(255, 107, 53, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 30% at 20% 80%, rgba(236, 114, 17, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Glow pulse animation */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Reveal animation */
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-reveal {
+  animation: reveal 0.8s ease-out forwards;
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Markdown content styling */
+.prose-chat {
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.65;
+}
+
+.prose-chat h1,
+.prose-chat h2,
+.prose-chat h3,
+.prose-chat h4 {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose-chat h1 { font-size: 1.5rem; }
+.prose-chat h2 { font-size: 1.25rem; }
+.prose-chat h3 { font-size: 1.125rem; }
+
+.prose-chat p {
+  margin-bottom: 0.75em;
+}
+
+.prose-chat ul,
+.prose-chat ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.prose-chat li {
+  margin-bottom: 0.25em;
+}
+
+.prose-chat code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.prose-chat pre {
+  background: #0d0d0d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1em;
+  overflow-x: auto;
+  margin: 0.75em 0;
+}
+
+.prose-chat pre code {
+  background: none;
+  padding: 0;
+}
+
+.prose-chat strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.prose-chat a {
+  color: #FE3184;
+  text-decoration: underline;
+  text-decoration-color: rgba(254, 49, 132, 0.3);
+}
+
+.prose-chat a:hover {
+  text-decoration-color: #FE3184;
+}
+
+.prose-chat blockquote {
+  border-left: 3px solid #FE3184;
+  padding-left: 1em;
+  margin: 0.75em 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.prose-chat table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+  font-size: 0.9em;
+}
+
+.prose-chat th {
+  text-align: left;
+  padding: 0.5em 0.75em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.prose-chat td {
+  padding: 0.5em 0.75em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.prose-chat hr {
+  border-color: rgba(255, 255, 255, 0.08);
+  margin: 1.5em 0;
+}

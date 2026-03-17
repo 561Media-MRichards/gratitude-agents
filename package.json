@@ -1,16 +1,42 @@
 {
   "name": "gratitude-agents",
-  "version": "1.0.0",
-  "description": "Unified agent system combining marketing content skills with visual design skills for Gratitude.com. Built for Claude Code.",
-  "main": "index.js",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Gratitude.com AI agent chat platform — 14 marketing + design agents with shared knowledgebase",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "@napi-rs/canvas": "^0.1.94",
+    "@neondatabase/serverless": "^0.10.4",
+    "@tailwindcss/postcss": "^4.2.1",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^17.3.1",
+    "drizzle-orm": "^0.38.3",
+    "gray-matter": "^4.0.3",
+    "jose": "^6.0.8",
+    "next": "^15.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^9.0.3",
+    "remark-gfm": "^4.0.0",
     "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "drizzle-kit": "^0.30.5",
+    "eslint": "^9.25.1",
+    "eslint-config-next": "^15.3.2",
+    "tailwindcss": "^4.1.4",
+    "typescript": "^5.8.3"
   }
 }
