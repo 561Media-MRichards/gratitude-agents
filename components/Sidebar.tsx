@@ -191,12 +191,18 @@ export default function Sidebar({
 
       {/* Footer */}
       <div className="p-3 border-t border-white/[0.06]">
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <a
             href="/knowledgebase"
             className="flex-1 py-2 text-center text-[11px] text-white/40 hover:text-white/60 rounded-lg hover:bg-white/[0.03] transition-colors"
           >
-            Knowledgebase
+            KB
+          </a>
+          <a
+            href="/resources"
+            className="flex-1 py-2 text-center text-[11px] text-white/40 hover:text-white/60 rounded-lg hover:bg-white/[0.03] transition-colors"
+          >
+            Resources
           </a>
           <button
             onClick={handleLogout}
