@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 interface Conversation {
   id: string;
@@ -35,7 +35,9 @@ export default function Sidebar({
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [session, setSession] = useState<SessionResponse | null>(null);
   const [search, setSearch] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     fetch("/api/session").then(async (res) => {
@@ -84,8 +86,14 @@ export default function Sidebar({
   if (older.length) groups.push({ label: "Older", items: older });
 
   function handleDelete(id: string) {
-    setConversations((prev) => prev.filter((c) => c.id !== id));
-    onDeleteConversation(id);
+    setConfirmDeleteId(id);
+  }
+
+  function confirmDelete() {
+    if (!confirmDeleteId) return;
+    setConversations((prev) => prev.filter((c) => c.id !== confirmDeleteId));
+    onDeleteConversation(confirmDeleteId);
+    setConfirmDeleteId(null);
   }
 
   async function handleLogout() {
@@ -127,53 +135,55 @@ export default function Sidebar({
 
       {/* Navigation icons */}
       <div className="px-3 pb-2 flex gap-1">
-        <Link
-          href="/chat"
-          className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl text-white/50 hover:text-white/80 hover:bg-white/[0.05] transition-all"
-          title="Chat"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-          </svg>
-          <span className="text-[9px] font-medium tracking-wide uppercase">Chat</span>
-        </Link>
-        <Link
-          href="/knowledgebase"
-          className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl text-white/50 hover:text-white/80 hover:bg-white/[0.05] transition-all"
-          title="Knowledge Base"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" />
-            <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" />
-          </svg>
-          <span className="text-[9px] font-medium tracking-wide uppercase">Knowledge</span>
-        </Link>
-        <Link
-          href="/resources"
-          className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl text-white/50 hover:text-white/80 hover:bg-white/[0.05] transition-all"
-          title="Files"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" />
-            <polyline points="13 2 13 9 20 9" />
-          </svg>
-          <span className="text-[9px] font-medium tracking-wide uppercase">Files</span>
-        </Link>
-        {isAdmin && (
-          <Link
-            href="/admin"
-            className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl text-white/50 hover:text-white/80 hover:bg-white/[0.05] transition-all"
-            title="Admin"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 00-3-3.87" />
-              <path d="M16 3.13a4 4 0 010 7.75" />
-            </svg>
-            <span className="text-[9px] font-medium tracking-wide uppercase">Admin</span>
-          </Link>
-        )}
+        {[
+          {
+            href: "/chat",
+            label: "Chat",
+            match: "/chat",
+            icon: <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />,
+          },
+          {
+            href: "/knowledgebase",
+            label: "Knowledge",
+            match: "/knowledgebase",
+            icon: <><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" /><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" /></>,
+          },
+          {
+            href: "/resources",
+            label: "Files",
+            match: "/resources",
+            icon: <><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" /><polyline points="13 2 13 9 20 9" /></>,
+          },
+          ...(isAdmin
+            ? [
+                {
+                  href: "/admin",
+                  label: "Admin",
+                  match: "/admin",
+                  icon: <><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></>,
+                },
+              ]
+            : []),
+        ].map((nav) => {
+          const active = pathname === nav.match || pathname?.startsWith(nav.match + "/");
+          return (
+            <Link
+              key={nav.href}
+              href={nav.href}
+              className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all ${
+                active
+                  ? "text-brand-pink bg-brand-pink/[0.08]"
+                  : "text-white/50 hover:text-white/80 hover:bg-white/[0.05]"
+              }`}
+              title={nav.label}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                {nav.icon}
+              </svg>
+              <span className="text-[9px] font-medium tracking-wide uppercase">{nav.label}</span>
+            </Link>
+          );
+        })}
       </div>
 
       <div className="mx-3 border-t border-white/[0.06]" />
@@ -257,6 +267,36 @@ export default function Sidebar({
           </button>
         </div>
       </div>
+
+      {/* Delete confirmation */}
+      {confirmDeleteId && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div
+            className="mx-4 w-full max-w-xs p-5 rounded-2xl"
+            style={{
+              background: "linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%)",
+              border: "1px solid rgba(255,255,255,0.1)",
+            }}
+          >
+            <p className="text-[14px] text-white/80 font-medium mb-1">Delete conversation?</p>
+            <p className="text-[12px] text-white/40 mb-5">This can't be undone.</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="flex-1 py-2 rounded-lg text-[12px] font-medium text-white/60 border border-white/[0.1] hover:bg-white/[0.05] transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 py-2 rounded-lg text-[12px] font-medium text-white bg-red-500/80 hover:bg-red-500 transition-all"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

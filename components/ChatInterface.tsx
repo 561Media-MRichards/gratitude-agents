@@ -172,6 +172,7 @@ export default function ChatInterface({
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -195,8 +196,8 @@ export default function ChatInterface({
     el.style.height = Math.min(el.scrollHeight, 200) + "px";
   }
 
-  async function handleSend() {
-    const trimmed = input.trim();
+  async function handleSend(overrideMessage?: string) {
+    const trimmed = (overrideMessage || input).trim();
     if (!trimmed || streaming) return;
 
     setInput("");
@@ -241,9 +242,14 @@ export default function ChatInterface({
                 const parsed = JSON.parse(data);
                 if (parsed.searching) {
                   setSearching(true);
+                  setSearchQuery("");
+                }
+                if (parsed.searchQuery) {
+                  setSearchQuery(parsed.searchQuery);
                 }
                 if (parsed.text) {
                   setSearching(false);
+                  setSearchQuery("");
                   setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[updated.length - 1];
@@ -286,6 +292,7 @@ export default function ChatInterface({
     } finally {
       setStreaming(false);
       setSearching(false);
+      setSearchQuery("");
     }
   }
 
@@ -334,9 +341,9 @@ export default function ChatInterface({
       >
         <div className="max-w-3xl mx-auto px-6 py-6 space-y-6">
           {!hasMessages && (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="flex flex-col items-center justify-center py-16 text-center">
               <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl mb-5"
+                className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-5"
                 style={{
                   background: "rgba(254, 49, 132, 0.1)",
                   border: "1px solid rgba(254, 49, 132, 0.15)",
@@ -347,12 +354,41 @@ export default function ChatInterface({
               <h3 className="font-display text-xl uppercase text-gradient mb-2">
                 Gratitude
               </h3>
-              <p className="text-sm text-white/40 max-w-md leading-relaxed">
+              <p className="text-sm text-white/35 max-w-md leading-relaxed mb-8">
                 Your workspace assistant for copy, strategy, design direction, and anything else you need done.
               </p>
-              <p className="text-[12px] text-white/25 mt-4">
-                Tell me what you need and I'll take it from there
-              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-xl w-full">
+                {[
+                  { label: "Build a content calendar for next week", icon: "📅" },
+                  { label: "Create a sponsor pitch deck", icon: "📊" },
+                  { label: "Write a nurture email sequence", icon: "✉️" },
+                  { label: "Research latest trends in corporate social impact", icon: "🔍" },
+                  { label: "Draft copy for our landing page", icon: "📝" },
+                  { label: "Generate a social media rollout plan", icon: "📱" },
+                ].map((prompt) => (
+                  <button
+                    key={prompt.label}
+                    onClick={() => handleSend(prompt.label)}
+                    className="flex items-start gap-3 px-4 py-3 rounded-xl text-left text-[13px] text-white/50 hover:text-white/75 transition-all group"
+                    style={{
+                      background: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = "rgba(254, 49, 132, 0.25)";
+                      e.currentTarget.style.background = "rgba(254, 49, 132, 0.04)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
+                      e.currentTarget.style.background = "rgba(255,255,255,0.02)";
+                    }}
+                  >
+                    <span className="text-base mt-0.5 shrink-0">{prompt.icon}</span>
+                    <span className="leading-snug">{prompt.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -368,8 +404,8 @@ export default function ChatInterface({
           ))}
 
           {streaming && (messages[messages.length - 1]?.content === "" || searching) && (
-            <div className="flex items-center gap-2 px-1">
-              <div className="flex gap-1">
+            <div className="flex items-start gap-2.5 px-1">
+              <div className="flex gap-1 mt-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-brand-pink/70 animate-pulse" />
                 <div
                   className="w-1.5 h-1.5 rounded-full bg-brand-coral/70 animate-pulse"
@@ -380,9 +416,16 @@ export default function ChatInterface({
                   style={{ animationDelay: "300ms" }}
                 />
               </div>
-              <span className="text-[11px] text-white/25">
-                {searching ? "Searching the web..." : "Gratitude is working on it..."}
-              </span>
+              <div>
+                <span className="text-[11px] text-white/25">
+                  {searching ? "Searching the web..." : "Gratitude is working on it..."}
+                </span>
+                {searching && searchQuery && (
+                  <p className="text-[11px] text-brand-pink/40 mt-0.5 italic">
+                    &ldquo;{searchQuery}&rdquo;
+                  </p>
+                )}
+              </div>
             </div>
           )}
 
@@ -419,7 +462,7 @@ export default function ChatInterface({
                 {streaming ? "Streaming..." : "Enter to send"}
               </span>
               <button
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!input.trim() || streaming}
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-white transition-all duration-200 disabled:opacity-20 hover:-translate-y-0.5 active:translate-y-0"
                 style={{

@@ -226,6 +226,8 @@ export async function POST(request: Request) {
 
     let fullResponse = "";
     const citations: { url: string; title: string }[] = [];
+    let searchQueryBuffer = "";
+    let inServerToolUse = false;
 
     const readableStream = new ReadableStream({
       async start(controller) {
@@ -234,26 +236,44 @@ export async function POST(request: Request) {
           for await (const event of stream) {
             if (event.type === "content_block_start") {
               const block = event.content_block as { type: string };
-              // Send a searching indicator when web search starts
               if (block.type === "server_tool_use") {
+                inServerToolUse = true;
+                searchQueryBuffer = "";
                 controller.enqueue(
                   encoder.encode(
                     `data: ${JSON.stringify({ searching: true, conversationId: convId })}\n\n`
                   )
                 );
+              } else {
+                inServerToolUse = false;
               }
             }
 
-            if (
-              event.type === "content_block_delta" &&
-              event.delta.type === "text_delta"
-            ) {
-              fullResponse += event.delta.text;
-              controller.enqueue(
-                encoder.encode(
-                  `data: ${JSON.stringify({ text: event.delta.text, conversationId: convId })}\n\n`
-                )
-              );
+            if (event.type === "content_block_delta") {
+              const delta = event.delta as { type: string; text?: string; partial_json?: string };
+
+              // Capture search query from input_json_delta
+              if (delta.type === "input_json_delta" && inServerToolUse && delta.partial_json) {
+                searchQueryBuffer += delta.partial_json;
+                // Try to extract the query as it streams in
+                const qMatch = searchQueryBuffer.match(/"query"\s*:\s*"([^"]+)/);
+                if (qMatch) {
+                  controller.enqueue(
+                    encoder.encode(
+                      `data: ${JSON.stringify({ searchQuery: qMatch[1], conversationId: convId })}\n\n`
+                    )
+                  );
+                }
+              }
+
+              if (delta.type === "text_delta" && delta.text) {
+                fullResponse += delta.text;
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ text: delta.text, conversationId: convId })}\n\n`
+                  )
+                );
+              }
             }
 
             // Collect citations from text blocks when they finish
