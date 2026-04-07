@@ -71,6 +71,7 @@ export default function ChatInterface({
 }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [searching, setSearching] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -138,7 +139,11 @@ export default function ChatInterface({
               if (data === "[DONE]") continue;
               try {
                 const parsed = JSON.parse(data);
+                if (parsed.searching) {
+                  setSearching(true);
+                }
                 if (parsed.text) {
+                  setSearching(false);
                   setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[updated.length - 1];
@@ -150,6 +155,10 @@ export default function ChatInterface({
                     }
                     return updated;
                   });
+                }
+                if (parsed.citations) {
+                  // Citations are appended to the saved message server-side
+                  // as markdown links, so they'll render naturally
                 }
                 if (parsed.conversationId && !conversationId) {
                   onConversationCreated(parsed.conversationId);
@@ -176,6 +185,7 @@ export default function ChatInterface({
       });
     } finally {
       setStreaming(false);
+      setSearching(false);
     }
   }
 
@@ -291,7 +301,7 @@ export default function ChatInterface({
             />
           ))}
 
-          {streaming && messages[messages.length - 1]?.content === "" && (
+          {streaming && (messages[messages.length - 1]?.content === "" || searching) && (
             <div className="flex items-center gap-2 px-1">
               <div className="flex gap-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-brand-pink/70 animate-pulse" />
@@ -305,7 +315,7 @@ export default function ChatInterface({
                 />
               </div>
               <span className="text-[11px] text-white/25">
-                Gratitude is working on it...
+                {searching ? "Searching the web..." : "Gratitude is working on it..."}
               </span>
             </div>
           )}

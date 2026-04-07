@@ -203,24 +203,47 @@ export async function POST(request: Request) {
     const presentationNote =
       '\n\n## Presentation Output\nWhen a user asks you to create a presentation, deck, or slides, structure your output so it can be converted to a branded PPTX file. Output a JSON code block containing an array of slide objects. Each slide has a `type` and content fields:\n\nSlide types:\n- `title`: Opening slide. Fields: `title`, `subtitle`\n- `content`: Standard slide with heading and bullets or body text. Fields: `title`, `bullets` (array of strings) OR `body` (paragraph text)\n- `two-column`: Side-by-side layout. Fields: `title`, `left` ({heading, bullets}), `right` ({heading, bullets})\n- `quote`: Featured quote. Fields: `quote`, `attribution`\n- `stats`: Key metrics in cards. Fields: `title`, `stats` (array of {value, label})\n- `closing`: Final slide. Fields: `title`, `subtitle`, `body`\n\nAlways include speaker notes in a `notes` field per slide.\n\nExample:\n```json\n[\n  {"type": "title", "title": "Campaign Results Q1", "subtitle": "Gratitude.com Activation Report"},\n  {"type": "stats", "title": "Key Metrics", "stats": [{"value": "2.4M", "label": "Activations"}, {"value": "89%", "label": "Completion Rate"}]},\n  {"type": "content", "title": "What Worked", "bullets": ["Direct sponsor outreach drove 40% of sign-ups", "Email sequences had 3x industry open rates"]},\n  {"type": "closing", "title": "Next Steps", "subtitle": "Q2 Planning", "body": "gratitude.com"}\n]\n```\n\nAfter the JSON block, add a brief plain-language summary of the deck so the user can review the content before downloading. Tell them they can click the PPTX button to download it as a branded PowerPoint file.';
 
-    const systemPrompt = `${brandContext}${kbSection}\n\n---\n\n${agent.body}${specialistBody}${endUserBehaviorNote}${conciergeNote}${presentationNote}`;
+    const webSearchNote =
+      "\n\n## Web Search\nYou have access to web search. Use it when the user asks about current events, recent data, live information, competitor research, industry stats, or anything that benefits from up-to-date information. Do not tell the user you are searching - just do it and incorporate the results naturally. When you cite information from search results, mention the source naturally in your response (e.g., 'According to Forbes...' or 'A recent report from Nonprofit Quarterly found...').";
 
-    // Stream response
+    const systemPrompt = `${brandContext}${kbSection}\n\n---\n\n${agent.body}${specialistBody}${endUserBehaviorNote}${conciergeNote}${presentationNote}${webSearchNote}`;
+
+    // Stream response with web search enabled
     const anthropic = new Anthropic();
     const stream = anthropic.messages.stream({
       model: "claude-sonnet-4-20250514",
       max_tokens: 8192,
       system: systemPrompt,
       messages: apiMessages,
+      tools: [
+        {
+          type: "web_search_20250305",
+          name: "web_search",
+          max_uses: 3,
+        },
+      ],
     });
 
     let fullResponse = "";
+    const citations: { url: string; title: string }[] = [];
 
     const readableStream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
         try {
           for await (const event of stream) {
+            if (event.type === "content_block_start") {
+              const block = event.content_block as { type: string };
+              // Send a searching indicator when web search starts
+              if (block.type === "server_tool_use") {
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ searching: true, conversationId: convId })}\n\n`
+                  )
+                );
+              }
+            }
+
             if (
               event.type === "content_block_delta" &&
               event.delta.type === "text_delta"
@@ -232,7 +255,43 @@ export async function POST(request: Request) {
                 )
               );
             }
+
+            // Collect citations from text blocks when they finish
+            if (event.type === "content_block_stop") {
+              // Access the final message to extract citations after stream ends
+            }
           }
+
+          // After stream completes, extract citations from the final message
+          const finalMessage = await stream.finalMessage();
+          for (const block of finalMessage.content) {
+            if (block.type === "text" && "citations" in block && Array.isArray(block.citations)) {
+              for (const cite of block.citations) {
+                if ("url" in cite && "title" in cite) {
+                  const url = cite.url as string;
+                  const title = cite.title as string;
+                  // Deduplicate
+                  if (!citations.some((c) => c.url === url)) {
+                    citations.push({ url, title });
+                  }
+                }
+              }
+            }
+          }
+
+          // Send citations if any were collected
+          if (citations.length > 0) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ citations, conversationId: convId })}\n\n`
+              )
+            );
+            // Append citation links to the saved response
+            fullResponse +=
+              "\n\n---\n**Sources:** " +
+              citations.map((c) => `[${c.title}](${c.url})`).join(" | ");
+          }
+
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
         } catch (err) {
