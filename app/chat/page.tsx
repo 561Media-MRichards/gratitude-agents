@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import ChatInterface from "@/components/ChatInterface";
 
@@ -31,12 +31,24 @@ export default function ChatPage() {
     setMessages([]);
   }
 
+  async function handleDeleteConversation(id: string) {
+    const res = await fetch(`/api/conversations/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      // If we deleted the active conversation, clear the chat
+      if (conversationId === id) {
+        setConversationId(null);
+        setMessages([]);
+      }
+    }
+  }
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar
         conversationId={conversationId}
         onSelectConversation={handleSelectConversation}
         onNewChat={handleNewChat}
+        onDeleteConversation={handleDeleteConversation}
       />
 
       <ChatInterface

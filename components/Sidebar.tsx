@@ -16,6 +16,7 @@ interface SidebarProps {
   conversationId: string | null;
   onSelectConversation: (id: string) => void;
   onNewChat: () => void;
+  onDeleteConversation: (id: string) => void;
 }
 
 interface SessionResponse {
@@ -29,6 +30,7 @@ export default function Sidebar({
   conversationId,
   onSelectConversation,
   onNewChat,
+  onDeleteConversation,
 }: SidebarProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [session, setSession] = useState<SessionResponse | null>(null);
@@ -80,6 +82,11 @@ export default function Sidebar({
   if (yesterday.length) groups.push({ label: "Yesterday", items: yesterday });
   if (thisWeek.length) groups.push({ label: "This week", items: thisWeek });
   if (older.length) groups.push({ label: "Older", items: older });
+
+  function handleDelete(id: string) {
+    setConversations((prev) => prev.filter((c) => c.id !== id));
+    onDeleteConversation(id);
+  }
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -198,17 +205,31 @@ export default function Sidebar({
                 {group.label}
               </div>
               {group.items.map((conv) => (
-                <button
-                  key={conv.id}
-                  onClick={() => onSelectConversation(conv.id)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-[13px] transition-all ${
-                    conversationId === conv.id
-                      ? "bg-white/[0.08] text-white/90"
-                      : "text-white/50 hover:bg-white/[0.04] hover:text-white/70"
-                  }`}
-                >
-                  <div className="line-clamp-1">{conv.title || "Untitled"}</div>
-                </button>
+                <div key={conv.id} className="group/conv relative">
+                  <button
+                    onClick={() => onSelectConversation(conv.id)}
+                    className={`w-full text-left px-3 py-2 pr-8 rounded-lg text-[13px] transition-all ${
+                      conversationId === conv.id
+                        ? "bg-white/[0.08] text-white/90"
+                        : "text-white/50 hover:bg-white/[0.04] hover:text-white/70"
+                    }`}
+                  >
+                    <div className="line-clamp-1">{conv.title || "Untitled"}</div>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(conv.id);
+                    }}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded-md opacity-0 group-hover/conv:opacity-100 text-white/20 hover:text-red-400 hover:bg-red-400/10 transition-all"
+                    title="Delete conversation"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                    </svg>
+                  </button>
+                </div>
               ))}
             </div>
           ))
