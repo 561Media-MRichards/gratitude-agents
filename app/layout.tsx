@@ -16,8 +16,8 @@ const anton = Anton({
 });
 
 export const metadata: Metadata = {
-  title: "Gratitude Agents",
-  description: "AI-powered marketing and design agents for Gratitude.com",
+  title: "Gratitude",
+  description: "Your Gratitude workspace assistant",
 };
 
 export default function RootLayout({

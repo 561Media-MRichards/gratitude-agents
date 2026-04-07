@@ -23,7 +23,7 @@ export default function LoginForm() {
       });
 
       if (res.ok) {
-        router.push("/portal");
+        router.push("/chat");
       } else {
         const data = await res.json();
         setError(data.error || "Login failed");

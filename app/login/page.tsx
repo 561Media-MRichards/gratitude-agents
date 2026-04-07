@@ -47,11 +47,8 @@ export default function LoginPage() {
 
         {/* Title section */}
         <div className="text-center space-y-3">
-          <h1 className="font-display text-5xl uppercase tracking-wide text-gradient">
-            PORTAL
-          </h1>
-          <p className="text-white/50 text-sm tracking-wide">
-            A simple Gratitude workspace for getting content, files, and answers fast
+          <p className="text-white/40 text-sm tracking-wide">
+            Sign in to start a conversation
           </p>
         </div>
 

@@ -134,13 +134,13 @@ export default function PortalDashboard() {
             }}
           >
             <p className="text-[11px] uppercase tracking-[0.28em] text-brand-pink mb-3">
-              Gratitude Partner Portal
+              Gratitude Workspace
             </p>
             <h1 className="font-display text-4xl md:text-6xl uppercase text-gradient leading-none mb-5">
-              One Gratitude Workspace, Real Help Behind It
+              Your Saved Work
             </h1>
             <p className="max-w-2xl text-white/55 leading-relaxed text-[15px]">
-              This workspace is built for non-technical employees and partners who just need things done. Ask for what you need in plain English, let Gratitude guide the work, and save the outputs you want to reuse or share.
+              Browse your conversations, saved knowledge, and files. To start something new, head to the chat.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -153,7 +153,7 @@ export default function PortalDashboard() {
                   boxShadow: "0 10px 30px rgba(254,49,132,0.25)",
                 }}
               >
-                Start A Guided Request
+                Open Chat
               </Link>
               <Link
                 href="/resources"
