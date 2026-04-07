@@ -20,15 +20,15 @@ interface DashboardState {
 const QUICK_STARTS = [
   {
     title: "Tell Gratitude what you need",
-    description: "Start here if you want a guided conversation instead of figuring out the path yourself.",
-    href: "/chat?agent=orchestrator",
+    description: "Describe your goal in plain English and Gratitude will guide the work from there.",
+    href: "/chat",
     label: "Start Here",
   },
   {
-    title: "Get writing or messaging help",
-    description: "Use this when you need sponsor copy, page content, emails, or messaging support quickly.",
-    href: "/chat?agent=direct-response-copy",
-    label: "Open Writing Help",
+    title: "Pick up where you left off",
+    description: "Continue a previous conversation or revisit something you worked on earlier.",
+    href: "/chat",
+    label: "Open Chat",
   },
   {
     title: "Turn a conversation into a file",
@@ -42,12 +42,12 @@ const WORKFLOWS = [
   {
     name: "Plan a new campaign",
     steps: "Clarify the angle, shape the message, and turn it into campaign-ready content.",
-    href: "/chat?agent=positioning-angles",
+    href: "/chat",
   },
   {
     name: "Create a partner deck or sponsor kit",
     steps: "Draft the message, shape the deliverable, and save it in the shared file library.",
-    href: "/chat?agent=direct-response-copy",
+    href: "/chat",
   },
   {
     name: "Capture something worth reusing",
@@ -145,7 +145,7 @@ export default function PortalDashboard() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/chat?agent=orchestrator"
+                href="/chat"
                 className="px-5 py-3 rounded-full text-sm font-semibold text-white"
                 style={{
                   background:

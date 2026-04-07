@@ -7,6 +7,7 @@ const BRAND_MEMORY_PATH = path.join(process.cwd(), ".claude", "brand-memory.md")
 
 // Map agent IDs to retrieval rule task profiles
 const AGENT_TO_PROFILE: Record<string, string> = {
+  "gratitude": "website_copy",
   "orchestrator": "website_copy",
   "brand-voice": "website_copy",
   "positioning-angles": "sponsor_materials",

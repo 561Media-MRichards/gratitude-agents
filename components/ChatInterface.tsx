@@ -11,43 +11,31 @@ interface Message {
 
 interface ChatInterfaceProps {
   agentId: string;
-  agentName: string;
-  agentDescription: string;
-  agentType: "system" | "marketing" | "design";
   conversationId: string | null;
   onConversationCreated: (id: string) => void;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 }
 
-const DESIGN_AGENTS = new Set([
-  "social-creative",
-  "deliverable-design",
-  "web-mockup",
-  "brand-asset-design",
-  "canvas-art",
-]);
-
 async function downloadConversation(
   messages: Message[],
-  agentName: string,
   format: "md" | "doc" | "pdf"
 ) {
   const content = messages
     .map((m) =>
       m.role === "user"
         ? `## You\n\n${m.content}`
-        : `## ${agentName}\n\n${m.content}`
+        : `## Gratitude\n\n${m.content}`
     )
     .join("\n\n---\n\n");
 
-  const title = `Conversation with ${agentName}`;
+  const title = "Conversation with Gratitude";
   const res = await fetch("/api/exports", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       title,
-      content: `_Gratitude.com Agents — ${new Date().toLocaleDateString()}_\n\n---\n\n${content}`,
+      content: `_Gratitude.com -- ${new Date().toLocaleDateString()}_\n\n---\n\n${content}`,
       format,
     }),
   });
@@ -61,17 +49,13 @@ async function downloadConversation(
   const a = document.createElement("a");
   a.href = url;
   a.download =
-    match?.[1] ||
-    `${agentName.toLowerCase().replace(/\s+/g, "-")}-conversation-${Date.now()}.${format}`;
+    match?.[1] || `gratitude-conversation-${Date.now()}.${format}`;
   a.click();
   URL.revokeObjectURL(url);
 }
 
 export default function ChatInterface({
   agentId,
-  agentName,
-  agentDescription,
-  agentType,
   conversationId,
   onConversationCreated,
   messages,
@@ -95,7 +79,6 @@ export default function ChatInterface({
     textareaRef.current?.focus();
   }, [agentId]);
 
-  // Auto-resize textarea
   function resizeTextarea() {
     const el = textareaRef.current;
     if (!el) return;
@@ -114,7 +97,6 @@ export default function ChatInterface({
     setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setStreaming(true);
 
-    // Add empty assistant message for streaming
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
     try {
@@ -196,12 +178,11 @@ export default function ChatInterface({
     }
   }
 
-  const isDesign = DESIGN_AGENTS.has(agentId);
   const hasMessages = messages.length > 0;
 
   return (
     <div className="flex-1 flex flex-col h-screen bg-dark-950">
-      {/* Agent header */}
+      {/* Header */}
       <div className="shrink-0 px-6 py-3 border-b border-white/[0.06] bg-dark-900/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -212,27 +193,22 @@ export default function ChatInterface({
                 border: "1px solid rgba(254, 49, 132, 0.2)",
               }}
             >
-              {agentType === "system"
-                ? "\u2699\uFE0F"
-                : agentType === "design"
-                  ? "\uD83C\uDFA8"
-                  : "\uD83D\uDCC8"}
+              &#x2728;
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-white/90">Gratitude Assistant</h2>
+              <h2 className="text-sm font-semibold text-white/90">Gratitude</h2>
               <p className="text-[11px] text-white/40 truncate max-w-lg">
-                {agentDescription}
+                Ask me anything - I'll bring the right expertise behind the scenes
               </p>
             </div>
           </div>
 
-          {/* Header actions */}
           {hasMessages && (
             <div className="flex items-center gap-1 shrink-0">
               <button
-                onClick={() => void downloadConversation(messages, agentName, "md")}
+                onClick={() => void downloadConversation(messages, "md")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white/60 hover:bg-white/[0.04] transition-all"
-                title="Download conversation as Markdown"
+                title="Download as Markdown"
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
@@ -242,28 +218,22 @@ export default function ChatInterface({
                 MD
               </button>
               <button
-                onClick={() => void downloadConversation(messages, agentName, "doc")}
+                onClick={() => void downloadConversation(messages, "doc")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white/60 hover:bg-white/[0.04] transition-all"
-                title="Download conversation as DOC"
+                title="Download as DOC"
               >
                 DOC
               </button>
               <button
-                onClick={() => void downloadConversation(messages, agentName, "pdf")}
+                onClick={() => void downloadConversation(messages, "pdf")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white/60 hover:bg-white/[0.04] transition-all"
-                title="Download conversation as PDF"
+                title="Download as PDF"
               >
                 PDF
               </button>
             </div>
           )}
         </div>
-
-        {isDesign && (
-          <div className="mt-2.5 px-3 py-2 rounded-lg bg-brand-orange/10 border border-brand-orange/20 text-[12px] text-brand-orange">
-            This conversation can guide creative direction and layout details, then turn the result into a downloadable file.
-          </div>
-        )}
       </div>
 
       {/* Messages */}
@@ -281,20 +251,16 @@ export default function ChatInterface({
                   border: "1px solid rgba(254, 49, 132, 0.15)",
                 }}
               >
-                {agentType === "system"
-                  ? "\u2699\uFE0F"
-                  : agentType === "design"
-                    ? "\uD83C\uDFA8"
-                    : "\uD83D\uDCC8"}
+                &#x2728;
               </div>
               <h3 className="font-display text-xl uppercase text-gradient mb-2">
-                Gratitude Assistant
+                Gratitude
               </h3>
               <p className="text-sm text-white/40 max-w-md leading-relaxed">
-                {agentDescription}
+                Your workspace assistant for copy, strategy, design direction, and anything else you need done.
               </p>
               <p className="text-[12px] text-white/25 mt-4">
-                Tell me what you need and I’ll guide the next step
+                Tell me what you need and I'll take it from there
               </p>
             </div>
           )}
@@ -304,13 +270,12 @@ export default function ChatInterface({
               key={i}
               role={msg.role}
               content={msg.content}
-              agentName={agentName}
+              agentName="Gratitude"
               conversationId={conversationId}
               isStreaming={streaming && i === messages.length - 1 && msg.role === "assistant"}
             />
           ))}
 
-          {/* Streaming indicator */}
           {streaming && messages[messages.length - 1]?.content === "" && (
             <div className="flex items-center gap-2 px-1">
               <div className="flex gap-1">
@@ -334,7 +299,7 @@ export default function ChatInterface({
         </div>
       </div>
 
-      {/* Input area */}
+      {/* Input */}
       <div className="shrink-0 border-t border-white/[0.06] bg-dark-900/30">
         <div className="max-w-3xl mx-auto px-6 py-4">
           <div
