@@ -19,15 +19,20 @@ interface ChatInterfaceProps {
 
 async function downloadConversation(
   messages: Message[],
-  format: "md" | "doc" | "pdf"
+  format: "md" | "doc" | "pdf" | "pptx"
 ) {
-  const content = messages
-    .map((m) =>
-      m.role === "user"
-        ? `## You\n\n${m.content}`
-        : `## Gratitude\n\n${m.content}`
-    )
-    .join("\n\n---\n\n");
+  // For PPTX, use the last assistant message as content (most likely to be the presentation)
+  const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+  const content =
+    format === "pptx" && lastAssistant
+      ? lastAssistant.content
+      : messages
+          .map((m) =>
+            m.role === "user"
+              ? `## You\n\n${m.content}`
+              : `## Gratitude\n\n${m.content}`
+          )
+          .join("\n\n---\n\n");
 
   const title = "Conversation with Gratitude";
   const res = await fetch("/api/exports", {
@@ -35,7 +40,10 @@ async function downloadConversation(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       title,
-      content: `_Gratitude.com -- ${new Date().toLocaleDateString()}_\n\n---\n\n${content}`,
+      content:
+        format === "pptx"
+          ? content
+          : `_Gratitude.com -- ${new Date().toLocaleDateString()}_\n\n---\n\n${content}`,
       format,
     }),
   });
@@ -230,6 +238,13 @@ export default function ChatInterface({
                 title="Download as PDF"
               >
                 PDF
+              </button>
+              <button
+                onClick={() => void downloadConversation(messages, "pptx")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-brand-pink/50 hover:text-brand-pink hover:bg-brand-pink/[0.06] transition-all"
+                title="Download as PowerPoint"
+              >
+                PPTX
               </button>
             </div>
           )}

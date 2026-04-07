@@ -12,20 +12,13 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const baseQuery = db.select().from(conversations);
-  const rows = isPrivilegedUser(session)
-    ? await baseQuery.orderBy(desc(conversations.updatedAt)).limit(100)
-    : await baseQuery
-        .where(
-          and(
-            or(
-              eq(conversations.ownerId, session.userId),
-              eq(conversations.visibility, "partner")
-            )
-          )
-        )
-        .orderBy(desc(conversations.updatedAt))
-        .limit(100);
+  // Each user only sees their own conversations
+  const rows = await db
+    .select()
+    .from(conversations)
+    .where(eq(conversations.ownerId, session.userId))
+    .orderBy(desc(conversations.updatedAt))
+    .limit(100);
 
   return NextResponse.json(rows);
 }

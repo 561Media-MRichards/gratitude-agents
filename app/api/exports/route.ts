@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { buildExportPayload } from "@/lib/exporters";
+import { generatePptx, parseSlideContent } from "@/lib/slides";
 
 export async function POST(request: Request) {
   const session = await getSession();
@@ -11,12 +12,35 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const format = body.format as "md" | "doc" | "pdf";
+    const format = body.format as "md" | "doc" | "pdf" | "pptx";
     const title = String(body.title || "Gratitude Output");
     const content = String(body.content || "");
 
-    if (!format || !["md", "doc", "pdf"].includes(format)) {
+    if (!format || !["md", "doc", "pdf", "pptx"].includes(format)) {
       return NextResponse.json({ error: "Invalid format" }, { status: 400 });
+    }
+
+    // PPTX generation
+    if (format === "pptx") {
+      // If slides JSON is provided directly, use it; otherwise parse from content
+      const presentationData = body.slides
+        ? { title, slides: body.slides }
+        : parseSlideContent(content, title);
+
+      const buffer = await generatePptx(presentationData);
+      const safeFileName =
+        title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "") || "gratitude-presentation";
+
+      return new NextResponse(new Uint8Array(buffer), {
+        headers: {
+          "Content-Type":
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+          "Content-Disposition": `attachment; filename="${safeFileName}.pptx"`,
+        },
+      });
     }
 
     const payload = await buildExportPayload(format, title, content);

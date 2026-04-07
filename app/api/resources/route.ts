@@ -76,23 +76,13 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const baseQuery = db.select().from(resources);
-  const rows = isPrivilegedUser(session)
-    ? await baseQuery.orderBy(desc(resources.updatedAt)).limit(200)
-    : await baseQuery
-        .where(
-          and(
-            or(
-              eq(resources.ownerId, session.userId),
-              and(
-                eq(resources.visibility, "partner"),
-                eq(resources.status, "published")
-              )
-            )
-          )
-        )
-        .orderBy(desc(resources.updatedAt))
-        .limit(200);
+  // Each user only sees their own files
+  const rows = await db
+    .select()
+    .from(resources)
+    .where(eq(resources.ownerId, session.userId))
+    .orderBy(desc(resources.updatedAt))
+    .limit(200);
 
   return NextResponse.json(rows);
 }

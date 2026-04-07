@@ -55,7 +55,7 @@ function DownloadButton({
 }: {
   content: string;
   title: string;
-  format: "md" | "doc" | "pdf";
+  format: "md" | "doc" | "pdf" | "pptx";
 }) {
   async function handleDownload() {
     const res = await fetch("/api/exports", {
@@ -233,6 +233,11 @@ export default function ChatMessage({
               content={content}
               title={`${agentName} Output`}
               format="pdf"
+            />
+            <DownloadButton
+              content={content}
+              title={`${agentName} Output`}
+              format="pptx"
             />
             <SaveButton
               content={content}
