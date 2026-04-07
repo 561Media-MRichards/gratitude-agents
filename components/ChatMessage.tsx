@@ -55,7 +55,7 @@ function DownloadButton({
 }: {
   content: string;
   title: string;
-  format: "md" | "doc" | "pdf" | "pptx" | "csv";
+  format: "md" | "doc" | "pdf" | "pptx" | "csv" | "xlsx";
 }) {
   async function handleDownload() {
     const res = await fetch("/api/exports", {
@@ -137,6 +137,79 @@ function SaveButton({
     >
       {saving ? "Saving..." : "Save"}
     </button>
+  );
+}
+
+type ContentType = "document" | "spreadsheet" | "presentation";
+
+function detectContentType(content: string): ContentType {
+  // Check for slide JSON (presentation)
+  const jsonMatch = content.match(/```(?:json)?\s*\n(\[[\s\S]*?\])\s*\n```/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[1]);
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].type && ["title", "content", "two-column", "quote", "stats", "closing"].includes(parsed[0].type)) {
+        return "presentation";
+      }
+    } catch { /* not JSON */ }
+  }
+
+  // Check for CSV data
+  const csvMatch = content.match(/```(?:csv)?\s*\n([\s\S]*?)\n```/);
+  if (csvMatch) return "spreadsheet";
+
+  // Check for unlabeled CSV-like content in a code block
+  const codeMatch = content.match(/```\s*\n([\s\S]*?)\n```/);
+  if (codeMatch) {
+    const lines = codeMatch[1].trim().split("\n");
+    if (lines.length > 2 && lines.every((l) => !l.trim() || l.split(",").length > 2)) {
+      return "spreadsheet";
+    }
+  }
+
+  return "document";
+}
+
+function MessageExportButtons({
+  content,
+  agentName,
+  conversationId,
+}: {
+  content: string;
+  agentName: string;
+  conversationId?: string | null;
+}) {
+  const type = detectContentType(content);
+  const title = `${agentName} Output`;
+
+  if (type === "presentation") {
+    return (
+      <>
+        <DownloadButton content={content} title={title} format="pptx" />
+        <DownloadButton content={content} title={title} format="pdf" />
+        <SaveButton content={content} title={title} conversationId={conversationId} />
+      </>
+    );
+  }
+
+  if (type === "spreadsheet") {
+    return (
+      <>
+        <DownloadButton content={content} title={title} format="csv" />
+        <DownloadButton content={content} title={title} format="xlsx" />
+        <SaveButton content={content} title={title} conversationId={conversationId} />
+      </>
+    );
+  }
+
+  // Document - standard text content
+  return (
+    <>
+      <DownloadButton content={content} title={title} format="md" />
+      <DownloadButton content={content} title={title} format="doc" />
+      <DownloadButton content={content} title={title} format="pdf" />
+      <SaveButton content={content} title={title} conversationId={conversationId} />
+    </>
   );
 }
 
@@ -298,40 +371,11 @@ export default function ChatMessage({
           </ReactMarkdown>
         </div>
 
-        {/* Action bar — appears after streaming completes */}
+        {/* Action bar — context-aware formats */}
         {content && !isStreaming && (
           <div className="flex items-center gap-1 mt-2 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-200">
             <CopyButton text={content} label="Copy" />
-            <DownloadButton
-              content={content}
-              title={`${agentName} Output`}
-              format="md"
-            />
-            <DownloadButton
-              content={content}
-              title={`${agentName} Output`}
-              format="doc"
-            />
-            <DownloadButton
-              content={content}
-              title={`${agentName} Output`}
-              format="pdf"
-            />
-            <DownloadButton
-              content={content}
-              title={`${agentName} Output`}
-              format="csv"
-            />
-            <DownloadButton
-              content={content}
-              title={`${agentName} Output`}
-              format="pptx"
-            />
-            <SaveButton
-              content={content}
-              title={`${agentName} Output`}
-              conversationId={conversationId}
-            />
+            <MessageExportButtons content={content} agentName={agentName} conversationId={conversationId} />
           </div>
         )}
       </div>

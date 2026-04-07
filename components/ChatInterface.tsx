@@ -19,12 +19,12 @@ interface ChatInterfaceProps {
 
 async function downloadConversation(
   messages: Message[],
-  format: "md" | "doc" | "pdf" | "pptx" | "csv"
+  format: "md" | "doc" | "pdf" | "pptx" | "csv" | "xlsx"
 ) {
-  // For PPTX/CSV, use the last assistant message as content
+  // For PPTX/CSV/XLSX, use the last assistant message as content
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
   const content =
-    (format === "pptx" || format === "csv") && lastAssistant
+    (format === "pptx" || format === "csv" || format === "xlsx") && lastAssistant
       ? lastAssistant.content
       : messages
           .map((m) =>
@@ -41,7 +41,7 @@ async function downloadConversation(
     body: JSON.stringify({
       title,
       content:
-        format === "pptx" || format === "csv"
+        format === "pptx" || format === "csv" || format === "xlsx"
           ? content
           : `_Gratitude.com -- ${new Date().toLocaleDateString()}_\n\n---\n\n${content}`,
       format,
@@ -60,6 +60,106 @@ async function downloadConversation(
     match?.[1] || `gratitude-conversation-${Date.now()}.${format}`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+type ConversationContentType = "document" | "spreadsheet" | "presentation" | "mixed";
+
+function detectConversationContentType(messages: Message[]): ConversationContentType {
+  const assistantMessages = messages.filter((m) => m.role === "assistant");
+  if (assistantMessages.length === 0) return "document";
+
+  let hasPresentation = false;
+  let hasSpreadsheet = false;
+
+  for (const msg of assistantMessages) {
+    const c = msg.content;
+
+    // Check for slide JSON
+    const jsonMatch = c.match(/```(?:json)?\s*\n(\[[\s\S]*?\])\s*\n```/);
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[1]);
+        if (Array.isArray(parsed) && parsed[0]?.type && ["title", "content", "two-column", "quote", "stats", "closing"].includes(parsed[0].type)) {
+          hasPresentation = true;
+        }
+      } catch { /* not slide JSON */ }
+    }
+
+    // Check for CSV
+    const csvMatch = c.match(/```(?:csv)?\s*\n[\s\S]*?\n```/);
+    if (csvMatch) hasSpreadsheet = true;
+  }
+
+  if (hasPresentation && hasSpreadsheet) return "mixed";
+  if (hasPresentation) return "presentation";
+  if (hasSpreadsheet) return "spreadsheet";
+  return "document";
+}
+
+function HeaderExportButton({
+  label,
+  onClick,
+  accent,
+}: {
+  label: string;
+  onClick: () => void;
+  accent?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] transition-all ${
+        accent
+          ? "text-brand-pink/50 hover:text-brand-pink hover:bg-brand-pink/[0.06]"
+          : "text-white/35 hover:text-white/60 hover:bg-white/[0.04]"
+      }`}
+      title={`Download as ${label}`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function HeaderExportButtons({
+  messages,
+  downloadConversation,
+}: {
+  messages: Message[];
+  downloadConversation: (msgs: Message[], fmt: "md" | "doc" | "pdf" | "pptx" | "csv" | "xlsx") => Promise<void>;
+}) {
+  const type = detectConversationContentType(messages);
+
+  type ExportFormat = "md" | "doc" | "pdf" | "pptx" | "csv" | "xlsx";
+  const btn = (label: string, fmt: ExportFormat, accent?: boolean) => (
+    <HeaderExportButton
+      key={fmt}
+      label={label}
+      onClick={() => void downloadConversation(messages, fmt)}
+      accent={accent}
+    />
+  );
+
+  return (
+    <div className="flex items-center gap-1 shrink-0">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/25 mr-1">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+      {type === "presentation" && (
+        <>{btn("PPTX", "pptx", true)}{btn("PDF", "pdf")}</>
+      )}
+      {type === "spreadsheet" && (
+        <>{btn("Excel", "xlsx", true)}{btn("CSV", "csv")}</>
+      )}
+      {type === "document" && (
+        <>{btn("MD", "md")}{btn("DOC", "doc")}{btn("PDF", "pdf")}</>
+      )}
+      {type === "mixed" && (
+        <>{btn("PPTX", "pptx", true)}{btn("Excel", "xlsx", true)}{btn("PDF", "pdf")}{btn("MD", "md")}</>
+      )}
+    </div>
+  );
 }
 
 export default function ChatInterface({
@@ -222,48 +322,7 @@ export default function ChatInterface({
           </div>
 
           {hasMessages && (
-            <div className="flex items-center gap-1 shrink-0">
-              <button
-                onClick={() => void downloadConversation(messages, "md")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white/60 hover:bg-white/[0.04] transition-all"
-                title="Download as Markdown"
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                MD
-              </button>
-              <button
-                onClick={() => void downloadConversation(messages, "doc")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white/60 hover:bg-white/[0.04] transition-all"
-                title="Download as DOC"
-              >
-                DOC
-              </button>
-              <button
-                onClick={() => void downloadConversation(messages, "pdf")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white/60 hover:bg-white/[0.04] transition-all"
-                title="Download as PDF"
-              >
-                PDF
-              </button>
-              <button
-                onClick={() => void downloadConversation(messages, "csv")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white/60 hover:bg-white/[0.04] transition-all"
-                title="Download as CSV"
-              >
-                CSV
-              </button>
-              <button
-                onClick={() => void downloadConversation(messages, "pptx")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-brand-pink/50 hover:text-brand-pink hover:bg-brand-pink/[0.06] transition-all"
-                title="Download as PowerPoint"
-              >
-                PPTX
-              </button>
-            </div>
+            <HeaderExportButtons messages={messages} downloadConversation={downloadConversation} />
           )}
         </div>
       </div>

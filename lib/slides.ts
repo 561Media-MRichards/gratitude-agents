@@ -192,15 +192,20 @@ function buildContentSlide(
   const topY = data.title ? 1.3 : 0.6;
 
   if (data.bullets && data.bullets.length > 0) {
+    // Scale font size down for many or long bullets
+    const totalChars = data.bullets.reduce((sum, b) => sum + b.length, 0);
+    const fontSize = totalChars > 400 || data.bullets.length > 5 ? 12 : 14;
+    const spacing = fontSize <= 12 ? 1.4 : 1.5;
+
     const bulletText = data.bullets.map((b) => ({
       text: b,
       options: {
-        fontSize: 15,
+        fontSize,
         fontFace: FONT_BODY,
         color: TEXT_BODY,
         bullet: { code: "2022", color: PINK },
-        lineSpacingMultiple: 1.6,
-        paraSpaceAfter: 8,
+        lineSpacingMultiple: spacing,
+        paraSpaceAfter: 6,
       },
     }));
 
@@ -208,20 +213,22 @@ function buildContentSlide(
       x: 0.7,
       y: topY,
       w: 8.6,
-      h: 5.2,
+      h: 5.5,
       valign: "top",
+      shrinkText: true,
     });
   } else if (data.body) {
     slide.addText(data.body, {
       x: 0.7,
       y: topY,
       w: 8.6,
-      h: 5.2,
-      fontSize: 15,
+      h: 5.5,
+      fontSize: 14,
       fontFace: FONT_BODY,
       color: TEXT_BODY,
-      lineSpacingMultiple: 1.6,
+      lineSpacingMultiple: 1.5,
       valign: "top",
+      shrinkText: true,
     });
   }
 
@@ -277,23 +284,26 @@ function buildTwoColumnSlide(
   }
 
   if (data.left?.bullets) {
+    const totalChars = data.left.bullets.reduce((s, b) => s + b.length, 0);
+    const fs = totalChars > 250 || data.left.bullets.length > 4 ? 11 : 12;
     const bullets = data.left.bullets.map((b) => ({
       text: b,
       options: {
-        fontSize: 13,
+        fontSize: fs,
         fontFace: FONT_BODY,
         color: TEXT_BODY,
         bullet: { code: "2022", color: PINK },
-        lineSpacingMultiple: 1.5,
-        paraSpaceAfter: 6,
+        lineSpacingMultiple: 1.4,
+        paraSpaceAfter: 4,
       },
     }));
     slide.addText(bullets, {
       x: 0.7,
       y: leftY + 0.6,
       w: 4,
-      h: 4.5,
+      h: 4.8,
       valign: "top",
+      shrinkText: true,
     });
   }
 
@@ -312,23 +322,26 @@ function buildTwoColumnSlide(
   }
 
   if (data.right?.bullets) {
+    const totalChars = data.right.bullets.reduce((s, b) => s + b.length, 0);
+    const fs = totalChars > 250 || data.right.bullets.length > 4 ? 11 : 12;
     const bullets = data.right.bullets.map((b) => ({
       text: b,
       options: {
-        fontSize: 13,
+        fontSize: fs,
         fontFace: FONT_BODY,
         color: TEXT_BODY,
         bullet: { code: "2022", color: PINK },
-        lineSpacingMultiple: 1.5,
-        paraSpaceAfter: 6,
+        lineSpacingMultiple: 1.4,
+        paraSpaceAfter: 4,
       },
     }));
     slide.addText(bullets, {
       x: 5.3,
       y: leftY + 0.6,
       w: 4,
-      h: 4.5,
+      h: 4.8,
       valign: "top",
+      shrinkText: true,
     });
   }
 
@@ -583,7 +596,7 @@ export async function generatePptx(data: PresentationData): Promise<Buffer> {
  * converting the markdown content into simple content slides.
  */
 export function parseSlideContent(content: string, title: string): PresentationData {
-  // Try to find a JSON block with slide data
+  // Try to find a JSON block with slide data (in code fence)
   const jsonMatch = content.match(/```(?:json)?\s*\n(\[[\s\S]*?\])\s*\n```/);
 
   if (jsonMatch) {
@@ -593,7 +606,20 @@ export function parseSlideContent(content: string, title: string): PresentationD
         return { title, slides };
       }
     } catch {
-      // Fall through to markdown parsing
+      // Fall through
+    }
+  }
+
+  // Try raw JSON array (not in a code block) - greedy match for large arrays
+  const rawJsonMatch = content.match(/\[\s*\{[\s\S]*"type"\s*:\s*"(?:title|content|two-column|quote|stats|closing)"[\s\S]*\}\s*\]/);
+  if (rawJsonMatch) {
+    try {
+      const slides = JSON.parse(rawJsonMatch[0]) as SlideData[];
+      if (Array.isArray(slides) && slides.length > 0 && slides[0].type) {
+        return { title, slides };
+      }
+    } catch {
+      // Fall through
     }
   }
 
