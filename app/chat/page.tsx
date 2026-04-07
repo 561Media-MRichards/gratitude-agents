@@ -117,27 +117,27 @@ export default function ChatPage() {
               &#x2728;
             </div>
             <h2 className="font-display text-2xl uppercase text-gradient mb-3">
-              Pick The Right Agent
+              Tell Gratitude What You Need
             </h2>
             <p className="text-sm text-white/40 max-w-xl mx-auto leading-relaxed">
-              Choose a specialist from the sidebar, or start with the orchestrator if you want the portal to route the work for you.
+              Start with the help area that feels closest to your goal, or begin with the main Gratitude assistant and let it guide you.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-8">
               {[
                 {
                   title: "Need direction",
-                  body: "Use the orchestrator when you are not sure which agent or workflow is right.",
+                  body: "Start here if you want Gratitude to guide the conversation and figure out the best path for you.",
                   href: "/chat?agent=orchestrator",
                 },
                 {
-                  title: "Need copy fast",
-                  body: "Go straight to Direct Response Copy for pages, sponsor pitches, and emails.",
+                  title: "Need writing help",
+                  body: "Use this when you need pages, emails, sponsor language, or messaging that is ready to shape into deliverables.",
                   href: "/chat?agent=direct-response-copy",
                 },
                 {
-                  title: "Need a finished file",
-                  body: "Generate the output in chat, then save it to Resources and export MD, DOC, or PDF.",
+                  title: "Need a downloadable deliverable",
+                  body: "Create the content in chat, then save it to files and download it as Markdown, DOC, or PDF.",
                   href: "/resources",
                 },
               ].map((item) => (

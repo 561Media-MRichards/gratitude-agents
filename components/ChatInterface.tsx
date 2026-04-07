@@ -219,7 +219,7 @@ export default function ChatInterface({
                   : "\uD83D\uDCC8"}
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-white/90">{agentName}</h2>
+              <h2 className="text-sm font-semibold text-white/90">Gratitude Assistant</h2>
               <p className="text-[11px] text-white/40 truncate max-w-lg">
                 {agentDescription}
               </p>
@@ -261,8 +261,7 @@ export default function ChatInterface({
 
         {isDesign && (
           <div className="mt-2.5 px-3 py-2 rounded-lg bg-brand-orange/10 border border-brand-orange/20 text-[12px] text-brand-orange">
-            Web Mode — provides design specs and creative direction. For
-            rendered PNG/PDF output, run locally via Claude Code.
+            This conversation can guide creative direction and layout details, then turn the result into a downloadable file.
           </div>
         )}
       </div>
@@ -289,13 +288,13 @@ export default function ChatInterface({
                     : "\uD83D\uDCC8"}
               </div>
               <h3 className="font-display text-xl uppercase text-gradient mb-2">
-                {agentName}
+                Gratitude Assistant
               </h3>
               <p className="text-sm text-white/40 max-w-md leading-relaxed">
                 {agentDescription}
               </p>
               <p className="text-[12px] text-white/25 mt-4">
-                Type a message below to get started
+                Tell me what you need and I’ll guide the next step
               </p>
             </div>
           )}
@@ -326,7 +325,7 @@ export default function ChatInterface({
                 />
               </div>
               <span className="text-[11px] text-white/25">
-                {agentName} is thinking...
+                Gratitude is working on it...
               </span>
             </div>
           )}
@@ -353,7 +352,7 @@ export default function ChatInterface({
                 resizeTextarea();
               }}
               onKeyDown={handleKeyDown}
-              placeholder={`Message ${agentName}...`}
+              placeholder="Tell Gratitude what you need..."
               rows={1}
               className="flex-1 resize-none bg-transparent text-white/85 text-[15px] leading-relaxed placeholder:text-white/25 focus:outline-none"
               style={{ maxHeight: "200px" }}

@@ -144,7 +144,16 @@ export async function POST(request: Request) {
         "\n\n## Web Mode\nYou are running in web mode. You cannot render images, create canvases, or write files. Instead, provide detailed design specifications, copy, creative direction, color values, typography specs, and layout descriptions. For rendered PNG/PDF output, the user should run locally via Claude Code.";
     }
 
-    const systemPrompt = `${brandContext}${kbSection}\n\n---\n\n${agent.body}${designWebModeNote}`;
+    const endUserBehaviorNote =
+      "\n\n## End-User Experience Rules\nYou are speaking to a non-technical Gratitude user. Be warm, clear, and direct. Do not mention slash commands, skill files, internal routing mechanics, technical implementation details, or tool names unless the user explicitly asks. Present yourself as Gratitude's assistant with the right expertise behind the scenes. Prefer natural language like 'I can help draft that' or 'Here’s what I need from you next.' Ask only for the minimum missing information and avoid jargon, menus, and option overload.";
+
+    let orchestratorBehaviorNote = "";
+    if (agentId === "orchestrator") {
+      orchestratorBehaviorNote =
+        "\n\n## Conversational Routing Rules\nAct like a dedicated Gratitude concierge. Do not tell the user to choose between internal workflows. Decide for them and guide the conversation forward. If a specialist is needed, translate that into plain-language next steps instead of naming internal commands. Do not include optional follow-ups, multiple branches, or extra possibilities unless the user asks for them. If information is missing, ask only for the smallest set of missing details needed to proceed.";
+    }
+
+    const systemPrompt = `${brandContext}${kbSection}\n\n---\n\n${agent.body}${designWebModeNote}${endUserBehaviorNote}${orchestratorBehaviorNote}`;
 
     // Load conversation history
     const history = await db

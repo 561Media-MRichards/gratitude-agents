@@ -51,7 +51,7 @@ export default function LoginPage() {
             PORTAL
           </h1>
           <p className="text-white/50 text-sm tracking-wide">
-            Partner-safe access to Gratitude Agents, resources, and knowledge
+            A simple Gratitude workspace for getting content, files, and answers fast
           </p>
         </div>
 

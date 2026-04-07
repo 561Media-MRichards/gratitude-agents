@@ -41,9 +41,9 @@ const TYPE_ICONS: Record<string, string> = {
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  system: "SYSTEM",
-  marketing: "MARKETING",
-  design: "DESIGN",
+  system: "START HERE",
+  marketing: "WRITING & STRATEGY",
+  design: "CREATIVE & DESIGN",
 };
 
 export default function Sidebar({
@@ -124,7 +124,7 @@ export default function Sidebar({
             height={26}
           />
           <span className="text-[10px] font-semibold tracking-[0.15em] uppercase text-brand-pink">
-            AGENTS
+            ASSISTANT
           </span>
         </div>
 
@@ -132,7 +132,7 @@ export default function Sidebar({
           onClick={onNewChat}
           className="w-full py-2 px-4 rounded-lg text-sm font-medium text-white/70 border border-white/[0.1] hover:border-brand-pink/30 hover:text-white/90 hover:bg-white/[0.03] transition-all"
         >
-          + New Chat
+          + New Request
         </button>
 
         {session && (
@@ -148,7 +148,7 @@ export default function Sidebar({
           <input
             value={agentSearch}
             onChange={(e) => setAgentSearch(e.target.value)}
-            placeholder={tab === "agents" ? "Find an agent" : "Find a conversation"}
+            placeholder={tab === "agents" ? "What do you need help with?" : "Find a conversation"}
             className="w-full rounded-xl bg-white/[0.03] border border-white/[0.08] px-3 py-2.5 text-[13px] text-white/75 placeholder:text-white/25 focus:outline-none focus:border-brand-pink/30"
           />
         </div>
@@ -164,7 +164,7 @@ export default function Sidebar({
               : "text-white/40 hover:text-white/60"
           }`}
         >
-          Agents
+          Help Areas
         </button>
         <button
           onClick={() => setTab("history")}
@@ -206,10 +206,10 @@ export default function Sidebar({
                       </div>
                       <div className="text-[10px] uppercase tracking-[0.14em] text-white/20 mt-2">
                         {agent.type === "system"
-                          ? "Best when you need routing"
+                          ? "Best when you are not sure where to start"
                           : agent.type === "design"
-                            ? "Best when you need specs or creative direction"
-                            : "Best when you need messaging or strategy"}
+                            ? "Best when you need visuals, layout, or creative direction"
+                            : "Best when you need messaging, content, or strategy"}
                       </div>
                     </button>
                   ))}

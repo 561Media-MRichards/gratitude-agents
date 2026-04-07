@@ -19,39 +19,39 @@ interface DashboardState {
 
 const QUICK_STARTS = [
   {
-    title: "Figure out where to start",
-    description: "Describe the goal in plain English and let the orchestrator route the work.",
+    title: "Tell Gratitude what you need",
+    description: "Start here if you want a guided conversation instead of figuring out the path yourself.",
     href: "/chat?agent=orchestrator",
-    label: "Open Orchestrator",
+    label: "Start Here",
   },
   {
-    title: "Create sponsor-facing copy",
-    description: "Start with the copy agent when you need landing page, email, or pitch language fast.",
+    title: "Get writing or messaging help",
+    description: "Use this when you need sponsor copy, page content, emails, or messaging support quickly.",
     href: "/chat?agent=direct-response-copy",
-    label: "Open Copy Agent",
+    label: "Open Writing Help",
   },
   {
-    title: "Turn an output into files",
-    description: "Save useful responses to the resource library and download them as MD, DOC, or PDF.",
+    title: "Turn a conversation into a file",
+    description: "Save useful responses to the file library and download them in the format you need.",
     href: "/resources",
-    label: "Open Resource Library",
+    label: "Open Files",
   },
 ];
 
 const WORKFLOWS = [
   {
-    name: "New campaign",
-    steps: "Positioning Angles -> Direct Response Copy -> Content Atomizer -> Social Creative",
+    name: "Plan a new campaign",
+    steps: "Clarify the angle, shape the message, and turn it into campaign-ready content.",
     href: "/chat?agent=positioning-angles",
   },
   {
-    name: "Partner deck or sponsor kit",
-    steps: "Direct Response Copy -> Deliverable Design -> Resources",
+    name: "Create a partner deck or sponsor kit",
+    steps: "Draft the message, shape the deliverable, and save it in the shared file library.",
     href: "/chat?agent=direct-response-copy",
   },
   {
-    name: "Capture team learning",
-    steps: "Chat -> Knowledge Base review -> Publish partner-safe insight",
+    name: "Capture something worth reusing",
+    steps: "Turn a useful conversation into reusable team knowledge and publish it when ready.",
     href: "/knowledgebase",
   },
 ];
@@ -98,19 +98,19 @@ export default function PortalDashboard() {
       label: "Live Conversations",
       value: stats.conversations,
       href: "/chat",
-      body: "Open a thread, continue an existing one, or route a new request to the right agent.",
+      body: "Start a request, continue an earlier conversation, or let Gratitude guide you to the right help.",
     },
     {
       label: "Approved Knowledge",
       value: stats.knowledgeEntries,
       href: "/knowledgebase",
-      body: "Find reusable learnings, improve weak drafts, and turn good conversations into team memory.",
+      body: "Find reusable guidance, improve draft learnings, and keep the best answers easy to use again.",
     },
     {
       label: "Saved Resources",
       value: stats.resources,
       href: "/resources",
-      body: "Keep source files, generated outputs, and client-ready downloads in one place.",
+      body: "Keep source files, saved outputs, and client-ready downloads in one simple library.",
     },
   ];
 
@@ -137,11 +137,10 @@ export default function PortalDashboard() {
               Gratitude Partner Portal
             </p>
             <h1 className="font-display text-4xl md:text-6xl uppercase text-gradient leading-none mb-5">
-              Work With Agents Without Guesswork
+              One Gratitude Workspace, Real Help Behind It
             </h1>
             <p className="max-w-2xl text-white/55 leading-relaxed text-[15px]">
-              This workspace is built to help employees and partners move from request to usable deliverable quickly:
-              start with the right agent, save what matters, and turn useful output into repeatable knowledge.
+              This workspace is built for non-technical employees and partners who just need things done. Ask for what you need in plain English, let Gratitude guide the work, and save the outputs you want to reuse or share.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -154,7 +153,7 @@ export default function PortalDashboard() {
                   boxShadow: "0 10px 30px rgba(254,49,132,0.25)",
                 }}
               >
-                Start With The Orchestrator
+                Start A Guided Request
               </Link>
               <Link
                 href="/resources"
@@ -185,8 +184,8 @@ export default function PortalDashboard() {
 
             <div className="space-y-3 text-sm text-white/50">
               <p>Private work stays private until it is intentionally published.</p>
-              <p>Knowledge should be edited for clarity before it becomes shared guidance.</p>
-              <p>Every strong response can become a downloadable file or reusable resource.</p>
+              <p>Good conversations can be cleaned up into shared guidance for the team.</p>
+              <p>Strong responses can become downloadable files without extra formatting work.</p>
             </div>
           </div>
         </div>
@@ -234,7 +233,7 @@ export default function PortalDashboard() {
 
           <div className="rounded-3xl border border-white/[0.08] p-6 bg-white/[0.03]">
             <h2 className="font-display text-3xl uppercase text-gradient mb-4">
-              Common Paths
+              Common Requests
             </h2>
             <div className="space-y-4">
               {WORKFLOWS.map((workflow) => (
