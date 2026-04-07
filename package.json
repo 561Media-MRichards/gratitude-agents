@@ -19,6 +19,7 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.38.3",
+    "exceljs": "^4.4.0",
     "gray-matter": "^4.0.3",
     "jose": "^6.0.8",
     "next": "^15.3.2",

@@ -154,7 +154,7 @@ function CsvDownloadButton({ text, fileName }: { text: string; fileName?: string
   return (
     <button
       onClick={handleDownload}
-      className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] text-brand-pink/70 hover:text-brand-pink hover:bg-brand-pink/[0.08] transition-all"
+      className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
       title="Download as CSV"
     >
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -162,7 +162,54 @@ function CsvDownloadButton({ text, fileName }: { text: string; fileName?: string
         <polyline points="7 10 12 15 17 10" />
         <line x1="12" y1="15" x2="12" y2="3" />
       </svg>
-      Download CSV
+      CSV
+    </button>
+  );
+}
+
+function XlsxDownloadButton({ text, title }: { text: string; title?: string }) {
+  const [downloading, setDownloading] = useState(false);
+
+  async function handleDownload() {
+    setDownloading(true);
+    try {
+      const res = await fetch("/api/exports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: text,
+          title: title || "Gratitude Export",
+          format: "xlsx",
+        }),
+      });
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const disposition = res.headers.get("Content-Disposition") || "";
+      const match = disposition.match(/filename="([^"]+)"/);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = match?.[1] || `gratitude-export-${Date.now()}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  return (
+    <button
+      onClick={handleDownload}
+      disabled={downloading}
+      className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] text-brand-pink/70 hover:text-brand-pink hover:bg-brand-pink/[0.08] transition-all disabled:opacity-50"
+      title="Download as branded Excel"
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+      {downloading ? "..." : "Excel"}
     </button>
   );
 }
@@ -179,7 +226,12 @@ function CodeBlock({ children, className }: { children: string; className?: stri
           {language || (isCsv ? "csv" : "code")}
         </span>
         <div className="flex items-center gap-1">
-          {isCsv && <CsvDownloadButton text={children} />}
+          {isCsv && (
+            <>
+              <CsvDownloadButton text={children} />
+              <XlsxDownloadButton text={`\`\`\`csv\n${children}\n\`\`\``} />
+            </>
+          )}
           <CopyButton text={children} label="Copy code" />
         </div>
       </div>
