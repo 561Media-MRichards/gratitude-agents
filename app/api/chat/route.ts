@@ -2,10 +2,16 @@ import { after } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { db } from "@/lib/db";
 import { conversations, messages, knowledgebaseEntries } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import { getAgent } from "@/lib/agents";
 import { getBrandContext } from "@/lib/brand-context";
 import { enrichConversation } from "@/lib/enrich";
+import { getSession } from "@/lib/auth";
+import {
+  canAccessConversation,
+  defaultVisibilityForRole,
+  isPrivilegedUser,
+} from "@/lib/permissions";
 
 const DESIGN_AGENTS = new Set([
   "social-creative",
@@ -19,6 +25,15 @@ export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
+    const session = await getSession();
+
+    if (!session) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const body = await request.json();
     const { message, agentId, conversationId } = body as {
       message: string;
@@ -47,9 +62,34 @@ export async function POST(request: Request) {
       const title = message.slice(0, 100) + (message.length > 100 ? "..." : "");
       const [conv] = await db
         .insert(conversations)
-        .values({ agentId, title })
+        .values({
+          ownerId: session.userId,
+          agentId,
+          title,
+          visibility: defaultVisibilityForRole(session),
+        })
         .returning();
       convId = conv.id;
+    } else {
+      const [conv] = await db
+        .select()
+        .from(conversations)
+        .where(eq(conversations.id, convId))
+        .limit(1);
+
+      if (!conv) {
+        return new Response(JSON.stringify({ error: "Conversation not found" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      if (!canAccessConversation(session, conv)) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Save user message
@@ -63,12 +103,31 @@ export async function POST(request: Request) {
     const brandContext = getBrandContext(agentId);
 
     // Get recent knowledgebase entries for this agent's domain
-    const kbEntries = await db
+    const kbBaseQuery = db
       .select()
       .from(knowledgebaseEntries)
-      .where(eq(knowledgebaseEntries.agentId, agentId))
-      .orderBy(desc(knowledgebaseEntries.createdAt))
-      .limit(20);
+      .where(eq(knowledgebaseEntries.agentId, agentId));
+    const kbEntries = isPrivilegedUser(session)
+      ? await kbBaseQuery
+          .orderBy(desc(knowledgebaseEntries.createdAt))
+          .limit(20)
+      : await db
+          .select()
+          .from(knowledgebaseEntries)
+          .where(
+            and(
+              eq(knowledgebaseEntries.agentId, agentId),
+              or(
+                eq(knowledgebaseEntries.ownerId, session.userId),
+                and(
+                  eq(knowledgebaseEntries.visibility, "partner"),
+                  eq(knowledgebaseEntries.status, "approved")
+                )
+              )
+            )
+          )
+          .orderBy(desc(knowledgebaseEntries.createdAt))
+          .limit(20);
 
     let kbSection = "";
     if (kbEntries.length > 0) {
@@ -161,7 +220,10 @@ export async function POST(request: Request) {
           .where(eq(conversations.id, convId!));
 
         if (msgCount.length >= 4 && !conv.enriched) {
-          await enrichConversation(convId!, agentId);
+          await enrichConversation(convId!, agentId, {
+            ownerId: session.userId,
+            role: session.role,
+          });
         }
       }
     });

@@ -1,35 +1,27 @@
 import { NextResponse } from "next/server";
-import { compare } from "bcryptjs";
 import { signJWT, COOKIE_NAME } from "@/lib/auth";
+import { authenticateUser } from "@/lib/portal-users";
 
 export async function POST(request: Request) {
   try {
-    const { password } = await request.json();
+    const { email, password } = await request.json();
 
-    if (!password) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: "Password is required" },
+        { error: "Email and password are required" },
         { status: 400 }
       );
     }
 
-    const hash = process.env.APP_PASSWORD_HASH;
-    if (!hash) {
+    const user = await authenticateUser(email, password);
+    if (!user) {
       return NextResponse.json(
-        { error: "Server configuration error" },
-        { status: 500 }
-      );
-    }
-
-    const valid = await compare(password, hash);
-    if (!valid) {
-      return NextResponse.json(
-        { error: "Invalid password" },
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
 
-    const token = await signJWT();
+    const token = await signJWT(user);
     const response = NextResponse.json({ success: true });
 
     response.cookies.set(COOKIE_NAME, token, {

@@ -28,7 +28,11 @@ const DESIGN_AGENTS = new Set([
   "canvas-art",
 ]);
 
-function downloadConversation(messages: Message[], agentName: string) {
+async function downloadConversation(
+  messages: Message[],
+  agentName: string,
+  format: "md" | "doc" | "pdf"
+) {
   const content = messages
     .map((m) =>
       m.role === "user"
@@ -37,14 +41,28 @@ function downloadConversation(messages: Message[], agentName: string) {
     )
     .join("\n\n---\n\n");
 
-  const header = `# Conversation with ${agentName}\n_Gratitude.com Agents — ${new Date().toLocaleDateString()}_\n\n---\n\n`;
-  const blob = new Blob([header + content], {
-    type: "text/markdown;charset=utf-8",
+  const title = `Conversation with ${agentName}`;
+  const res = await fetch("/api/exports", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title,
+      content: `_Gratitude.com Agents — ${new Date().toLocaleDateString()}_\n\n---\n\n${content}`,
+      format,
+    }),
   });
+
+  if (!res.ok) return;
+
+  const blob = await res.blob();
+  const disposition = res.headers.get("Content-Disposition") || "";
+  const match = disposition.match(/filename="([^"]+)"/);
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${agentName.toLowerCase().replace(/\s+/g, "-")}-conversation-${Date.now()}.md`;
+  a.download =
+    match?.[1] ||
+    `${agentName.toLowerCase().replace(/\s+/g, "-")}-conversation-${Date.now()}.${format}`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -134,7 +152,7 @@ export default function ChatInterface({
                   setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[updated.length - 1];
-                    if (last.role === "assistant") {
+                    if (last?.role === "assistant") {
                       updated[updated.length - 1] = {
                         ...last,
                         content: last.content + parsed.text,
@@ -212,16 +230,30 @@ export default function ChatInterface({
           {hasMessages && (
             <div className="flex items-center gap-1 shrink-0">
               <button
-                onClick={() => downloadConversation(messages, agentName)}
+                onClick={() => void downloadConversation(messages, agentName, "md")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white/60 hover:bg-white/[0.04] transition-all"
-                title="Download full conversation"
+                title="Download conversation as Markdown"
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
-                Export
+                MD
+              </button>
+              <button
+                onClick={() => void downloadConversation(messages, agentName, "doc")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white/60 hover:bg-white/[0.04] transition-all"
+                title="Download conversation as DOC"
+              >
+                DOC
+              </button>
+              <button
+                onClick={() => void downloadConversation(messages, agentName, "pdf")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white/60 hover:bg-white/[0.04] transition-all"
+                title="Download conversation as PDF"
+              >
+                PDF
               </button>
             </div>
           )}
@@ -273,6 +305,8 @@ export default function ChatInterface({
               key={i}
               role={msg.role}
               content={msg.content}
+              agentName={agentName}
+              conversationId={conversationId}
               isStreaming={streaming && i === messages.length - 1 && msg.role === "assistant"}
             />
           ))}

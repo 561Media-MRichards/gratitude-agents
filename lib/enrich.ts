@@ -22,7 +22,14 @@ Only extract genuinely useful, specific learnings. If the conversation is too ge
 
 Return ONLY valid JSON, no markdown fences.`;
 
-export async function enrichConversation(conversationId: string, agentId: string) {
+export async function enrichConversation(
+  conversationId: string,
+  agentId: string,
+  options: {
+    ownerId: string;
+    role: "admin" | "employee" | "partner";
+  }
+) {
   try {
     const msgs = await db
       .select()
@@ -63,11 +70,15 @@ export async function enrichConversation(conversationId: string, agentId: string
     for (const learning of learnings) {
       await db.insert(knowledgebaseEntries).values({
         conversationId,
+        ownerId: options.ownerId,
         agentId,
         category: learning.category,
+        status: options.role === "partner" ? "draft" : "approved",
+        visibility: options.role === "partner" ? "private" : "internal",
         title: learning.title,
         content: learning.content,
         tags: learning.tags || [],
+        sourceType: "conversation_enrichment",
       });
     }
 

@@ -48,10 +48,10 @@ export default function LoginPage() {
         {/* Title section */}
         <div className="text-center space-y-3">
           <h1 className="font-display text-5xl uppercase tracking-wide text-gradient">
-            AGENTS
+            PORTAL
           </h1>
           <p className="text-white/50 text-sm tracking-wide">
-            Marketing & design AI for Gratitude.com
+            Partner-safe access to Gratitude Agents, resources, and knowledge
           </p>
         </div>
 

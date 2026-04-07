@@ -9,6 +9,8 @@ interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
   isStreaming?: boolean;
+  agentName?: string;
+  conversationId?: string | null;
 }
 
 function CopyButton({ text, label }: { text: string; label?: string }) {
@@ -46,13 +48,31 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
   );
 }
 
-function DownloadButton({ content, filename }: { content: string; filename: string }) {
-  function handleDownload() {
-    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+function DownloadButton({
+  content,
+  title,
+  format,
+}: {
+  content: string;
+  title: string;
+  format: "md" | "doc" | "pdf";
+}) {
+  async function handleDownload() {
+    const res = await fetch("/api/exports", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content, title, format }),
+    });
+
+    if (!res.ok) return;
+
+    const blob = await res.blob();
+    const disposition = res.headers.get("Content-Disposition") || "";
+    const match = disposition.match(/filename="([^"]+)"/);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = filename;
+    a.download = match?.[1] || `${title}.${format}`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -68,7 +88,54 @@ function DownloadButton({ content, filename }: { content: string; filename: stri
         <polyline points="7 10 12 15 17 10" />
         <line x1="12" y1="15" x2="12" y2="3" />
       </svg>
-      Download
+      {format.toUpperCase()}
+    </button>
+  );
+}
+
+function SaveButton({
+  content,
+  title,
+  conversationId,
+}: {
+  content: string;
+  title: string;
+  conversationId?: string | null;
+}) {
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    setSaving(true);
+
+    try {
+      await fetch("/api/resources", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description: "Saved from agent output",
+          type: "generated",
+          fileName: `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "gratitude-output"}.md`,
+          mimeType: "text/markdown; charset=utf-8",
+          extension: "md",
+          conversationId,
+          textContent: content,
+          tags: ["agent-output"],
+        }),
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <button
+      onClick={handleSave}
+      className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
+      title="Save to resource library"
+      disabled={saving}
+    >
+      {saving ? "Saving..." : "Save"}
     </button>
   );
 }
@@ -93,7 +160,13 @@ function CodeBlock({ children, className }: { children: string; className?: stri
   );
 }
 
-export default function ChatMessage({ role, content, isStreaming }: ChatMessageProps) {
+export default function ChatMessage({
+  role,
+  content,
+  isStreaming,
+  agentName = "Gratitude Agent",
+  conversationId,
+}: ChatMessageProps) {
   if (role === "user") {
     return (
       <div className="flex justify-end group/msg">
@@ -146,7 +219,26 @@ export default function ChatMessage({ role, content, isStreaming }: ChatMessageP
         {content && !isStreaming && (
           <div className="flex items-center gap-1 mt-2 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-200">
             <CopyButton text={content} label="Copy" />
-            <DownloadButton content={content} filename="gratitude-agents-response.md" />
+            <DownloadButton
+              content={content}
+              title={`${agentName} Output`}
+              format="md"
+            />
+            <DownloadButton
+              content={content}
+              title={`${agentName} Output`}
+              format="doc"
+            />
+            <DownloadButton
+              content={content}
+              title={`${agentName} Output`}
+              format="pdf"
+            />
+            <SaveButton
+              content={content}
+              title={`${agentName} Output`}
+              conversationId={conversationId}
+            />
           </div>
         )}
       </div>

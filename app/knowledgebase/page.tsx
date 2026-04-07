@@ -18,12 +18,17 @@ export default function KnowledgebasePage() {
               KNOWLEDGEBASE
             </span>
           </div>
-          <Link
-            href="/chat"
-            className="text-sm text-white/40 hover:text-white/70 transition-colors"
-          >
-            &larr; Back to Chat
-          </Link>
+          <div className="flex items-center gap-5 text-sm text-white/40">
+            <Link href="/portal" className="hover:text-white/70 transition-colors">
+              Portal
+            </Link>
+            <Link href="/chat" className="hover:text-white/70 transition-colors">
+              Chat
+            </Link>
+            <Link href="/resources" className="hover:text-white/70 transition-colors">
+              Resources
+            </Link>
+          </div>
         </div>
       </header>
 

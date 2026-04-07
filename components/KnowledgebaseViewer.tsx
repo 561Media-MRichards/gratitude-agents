@@ -6,6 +6,8 @@ interface KBEntry {
   id: string;
   agentId: string;
   category: string;
+  status: "draft" | "review" | "approved";
+  visibility: "private" | "internal" | "partner";
   title: string;
   content: string;
   tags: string[];
@@ -18,6 +20,8 @@ interface FormData {
   title: string;
   content: string;
   tags: string;
+  visibility: "private" | "internal" | "partner";
+  status: "draft" | "review" | "approved";
 }
 
 const CATEGORIES = [
@@ -64,11 +68,21 @@ const EMPTY_FORM: FormData = {
   title: "",
   content: "",
   tags: "",
+  visibility: "internal",
+  status: "draft",
 };
+
+interface SessionResponse {
+  user: {
+    role: "admin" | "employee" | "partner";
+  };
+}
 
 export default function KnowledgebaseViewer() {
   const [entries, setEntries] = useState<KBEntry[]>([]);
+  const [session, setSession] = useState<SessionResponse | null>(null);
   const [filter, setFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "review" | "approved">("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -81,16 +95,26 @@ export default function KnowledgebaseViewer() {
   }, []);
 
   function fetchEntries() {
-    fetch("/api/knowledgebase")
-      .then((r) => r.json())
-      .then((data) => {
-        setEntries(data);
+    Promise.all([fetch("/api/knowledgebase"), fetch("/api/session")]).then(
+      async ([entriesRes, sessionRes]) => {
+        if (entriesRes.ok) {
+          setEntries(await entriesRes.json());
+        }
+        if (sessionRes.ok) {
+          const sessionData = await sessionRes.json();
+          setSession(sessionData);
+          if (sessionData.user.role === "partner") {
+            setForm((prev) => ({ ...prev, visibility: "private", status: "draft" }));
+          }
+        }
         setLoading(false);
-      });
+      }
+    );
   }
 
   const filtered = entries.filter((e) => {
     if (filter !== "all" && e.category !== filter) return false;
+    if (statusFilter !== "all" && e.status !== statusFilter) return false;
     if (search) {
       const q = search.toLowerCase();
       return (
@@ -110,7 +134,11 @@ export default function KnowledgebaseViewer() {
 
   function openCreate() {
     setEditingId(null);
-    setForm(EMPTY_FORM);
+    setForm({
+      ...EMPTY_FORM,
+      visibility: session?.user.role === "partner" ? "private" : "internal",
+      status: "draft",
+    });
     setModalOpen(true);
   }
 
@@ -122,6 +150,8 @@ export default function KnowledgebaseViewer() {
       title: entry.title,
       content: entry.content,
       tags: entry.tags?.join(", ") || "",
+      visibility: entry.visibility,
+      status: entry.status,
     });
     setModalOpen(true);
   }
@@ -135,6 +165,8 @@ export default function KnowledgebaseViewer() {
       category: form.category,
       title: form.title.trim(),
       content: form.content.trim(),
+      visibility: form.visibility,
+      status: form.status,
       tags: form.tags
         .split(",")
         .map((t) => t.trim())
@@ -177,8 +209,28 @@ export default function KnowledgebaseViewer() {
     );
   }
 
+  const canPublish =
+    session?.user.role === "admin" || session?.user.role === "employee";
+  const draftCount = entries.filter((entry) => entry.status === "draft").length;
+  const approvedCount = entries.filter((entry) => entry.status === "approved").length;
+
   return (
     <div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="rounded-2xl border border-white/[0.08] p-4 bg-white/[0.03]">
+          <div className="text-[11px] uppercase tracking-[0.16em] text-white/30 mb-2">Visible entries</div>
+          <div className="font-display text-3xl text-gradient">{entries.length}</div>
+        </div>
+        <div className="rounded-2xl border border-white/[0.08] p-4 bg-white/[0.03]">
+          <div className="text-[11px] uppercase tracking-[0.16em] text-white/30 mb-2">Needs refinement</div>
+          <div className="font-display text-3xl text-gradient">{draftCount}</div>
+        </div>
+        <div className="rounded-2xl border border-white/[0.08] p-4 bg-white/[0.03]">
+          <div className="text-[11px] uppercase tracking-[0.16em] text-white/30 mb-2">Approved guidance</div>
+          <div className="font-display text-3xl text-gradient">{approvedCount}</div>
+        </div>
+      </div>
+
       {/* Toolbar */}
       <div className="flex flex-wrap gap-3 mb-6 items-center">
         <input
@@ -188,6 +240,18 @@ export default function KnowledgebaseViewer() {
           placeholder="Search learnings..."
           className="px-4 py-2 bg-dark-800 border border-white/[0.08] rounded-lg text-sm text-white/80 placeholder:text-white/30 focus:outline-none focus:border-brand-pink/30 w-64"
         />
+        <select
+          value={statusFilter}
+          onChange={(e) =>
+            setStatusFilter(e.target.value as "all" | "draft" | "review" | "approved")
+          }
+          className="px-4 py-2 bg-dark-800 border border-white/[0.08] rounded-lg text-sm text-white/80 focus:outline-none focus:border-brand-pink/30"
+        >
+          <option value="all">All statuses</option>
+          <option value="draft">Draft</option>
+          <option value="review">Review</option>
+          <option value="approved">Approved</option>
+        </select>
         <div className="flex gap-1 flex-wrap">
           {CATEGORIES.map((cat) => (
             <button
@@ -219,10 +283,13 @@ export default function KnowledgebaseViewer() {
       {/* Grid */}
       {filtered.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-white/30 text-sm">
+          <h3 className="text-lg font-semibold text-white/80 mb-2">
+            {entries.length === 0 ? "No knowledge entries yet" : "Nothing matches these filters"}
+          </h3>
+          <p className="text-white/30 text-sm max-w-xl mx-auto leading-relaxed">
             {entries.length === 0
-              ? "No learnings yet. Click \"+ Add Entry\" to create one, or they'll appear automatically after conversations reach 4+ messages."
-              : "No results match your filters."}
+              ? "Add a learning manually or let the portal create drafts from longer conversations, then review and publish the ones worth sharing."
+              : "Try a different category, status, or keyword to widen the results."}
           </p>
         </div>
       ) : (
@@ -234,16 +301,24 @@ export default function KnowledgebaseViewer() {
               onClick={() => openEdit(entry)}
             >
               <div className="flex items-start justify-between gap-2 mb-2">
-                <span
-                  className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                  style={{
-                    color: CATEGORY_COLORS[entry.category] || "#888",
-                    background: `${CATEGORY_COLORS[entry.category] || "#888"}15`,
-                    border: `1px solid ${CATEGORY_COLORS[entry.category] || "#888"}30`,
-                  }}
-                >
-                  {entry.category.replace(/_/g, " ")}
-                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  <span
+                    className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                    style={{
+                      color: CATEGORY_COLORS[entry.category] || "#888",
+                      background: `${CATEGORY_COLORS[entry.category] || "#888"}15`,
+                      border: `1px solid ${CATEGORY_COLORS[entry.category] || "#888"}30`,
+                    }}
+                  >
+                    {entry.category.replace(/_/g, " ")}
+                  </span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-white/[0.08] text-white/40">
+                    {entry.status}
+                  </span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-white/[0.08] text-white/40">
+                    {entry.visibility}
+                  </span>
+                </div>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -278,9 +353,31 @@ export default function KnowledgebaseViewer() {
                   {entry.agentId} &middot;{" "}
                   {new Date(entry.createdAt).toLocaleDateString()}
                 </span>
-                <span className="text-[10px] text-white/20 opacity-0 group-hover:opacity-100 transition-all">
-                  Click to edit
-                </span>
+                <div className="flex items-center gap-2">
+                  {canPublish && entry.status !== "approved" && (
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        await fetch(`/api/knowledgebase/${entry.id}`, {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            status: "approved",
+                            visibility:
+                              entry.visibility === "private" ? "partner" : entry.visibility,
+                          }),
+                        });
+                        fetchEntries();
+                      }}
+                      className="text-[10px] text-brand-pink"
+                    >
+                      Approve
+                    </button>
+                  )}
+                  <span className="text-[10px] text-white/20 opacity-0 group-hover:opacity-100 transition-all">
+                    Click to edit
+                  </span>
+                </div>
               </div>
             </div>
           ))}
@@ -324,6 +421,48 @@ export default function KnowledgebaseViewer() {
                 }}
                 autoFocus
               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-white/40 mb-1.5">
+                  Visibility
+                </label>
+                <select
+                  value={form.visibility}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      visibility: e.target.value as "private" | "internal" | "partner",
+                    })
+                  }
+                  className="w-full px-4 py-3 rounded-xl text-[14px] text-white bg-dark-800 border border-white/[0.08]"
+                >
+                  <option value="private">Private</option>
+                  <option value="internal">Internal</option>
+                  <option value="partner">Partner</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-white/40 mb-1.5">
+                  Status
+                </label>
+                <select
+                  value={form.status}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      status: e.target.value as "draft" | "review" | "approved",
+                    })
+                  }
+                  disabled={!canPublish}
+                  className="w-full px-4 py-3 rounded-xl text-[14px] text-white bg-dark-800 border border-white/[0.08] disabled:opacity-50"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="review">Review</option>
+                  <option value="approved">Approved</option>
+                </select>
+              </div>
             </div>
 
             {/* Content */}

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { knowledgebaseEntries } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { resources } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import {
-  canEditKnowledgeEntry,
-  canPublishKnowledgeEntry,
-  canViewKnowledgeEntry,
+  canEditResource,
+  canPublishResource,
+  canViewResource,
   defaultVisibilityForRole,
 } from "@/lib/permissions";
 
@@ -15,25 +15,23 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession();
+
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
-  const [entry] = await db
-    .select()
-    .from(knowledgebaseEntries)
-    .where(eq(knowledgebaseEntries.id, id));
+  const [resource] = await db.select().from(resources).where(eq(resources.id, id));
 
-  if (!entry) {
+  if (!resource) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  if (!canViewKnowledgeEntry(session, entry)) {
+  if (!canViewResource(session, resource)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  return NextResponse.json(entry);
+  return NextResponse.json(resource);
 }
 
 export async function PUT(
@@ -41,49 +39,44 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession();
+
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
-  const body = await request.json();
-  const { agentId, category, title, content, tags, status, visibility } = body;
+  const [resource] = await db.select().from(resources).where(eq(resources.id, id));
 
-  const [entry] = await db
-    .select()
-    .from(knowledgebaseEntries)
-    .where(eq(knowledgebaseEntries.id, id));
-
-  if (!entry) {
+  if (!resource) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  if (!canEditKnowledgeEntry(session, entry)) {
+  if (!canEditResource(session, resource)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const body = await request.json();
   const [updated] = await db
-    .update(knowledgebaseEntries)
+    .update(resources)
     .set({
-      ...(agentId && { agentId }),
-      ...(category && { category }),
-      ...(title && { title }),
-      ...(content && { content }),
-      ...(tags && { tags }),
-      ...(visibility && {
-        visibility: canPublishKnowledgeEntry(session)
-          ? visibility
+      ...(body.title && { title: body.title }),
+      ...(body.description !== undefined && { description: body.description }),
+      ...(body.textContent !== undefined && { textContent: body.textContent }),
+      ...(body.tags && { tags: body.tags }),
+      ...(body.fileName && { fileName: body.fileName }),
+      ...(body.mimeType && { mimeType: body.mimeType }),
+      ...(body.extension && { extension: body.extension }),
+      ...(body.visibility && {
+        visibility: canPublishResource(session)
+          ? body.visibility
           : defaultVisibilityForRole(session),
       }),
-      ...(status && canPublishKnowledgeEntry(session) && { status }),
+      ...(body.status &&
+        canPublishResource(session) && { status: body.status }),
       updatedAt: new Date(),
     })
-    .where(eq(knowledgebaseEntries.id, id))
+    .where(eq(resources.id, id))
     .returning();
-
-  if (!updated) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
 
   return NextResponse.json(updated);
 }
@@ -93,26 +86,22 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession();
+
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
-  const [entry] = await db
-    .select()
-    .from(knowledgebaseEntries)
-    .where(eq(knowledgebaseEntries.id, id));
+  const [resource] = await db.select().from(resources).where(eq(resources.id, id));
 
-  if (!entry) {
+  if (!resource) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  if (!canEditKnowledgeEntry(session, entry)) {
+  if (!canEditResource(session, resource)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  await db
-    .delete(knowledgebaseEntries)
-    .where(eq(knowledgebaseEntries.id, id));
+  await db.delete(resources).where(eq(resources.id, id));
   return NextResponse.json({ success: true });
 }

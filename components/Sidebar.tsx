@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface Agent {
@@ -26,6 +27,13 @@ interface SidebarProps {
   onNewChat: () => void;
 }
 
+interface SessionResponse {
+  user: {
+    name: string;
+    role: "admin" | "employee" | "partner";
+  };
+}
+
 const TYPE_ICONS: Record<string, string> = {
   system: "\u2699\uFE0F",
   marketing: "\uD83D\uDCC8",
@@ -47,13 +55,20 @@ export default function Sidebar({
 }: SidebarProps) {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [session, setSession] = useState<SessionResponse | null>(null);
+  const [agentSearch, setAgentSearch] = useState("");
   const [tab, setTab] = useState<"agents" | "history">("agents");
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/agents")
-      .then((r) => r.json())
-      .then(setAgents);
+    Promise.all([fetch("/api/agents"), fetch("/api/session")]).then(
+      async ([agentsRes, sessionRes]) => {
+        setAgents(await agentsRes.json());
+        if (sessionRes.ok) {
+          setSession(await sessionRes.json());
+        }
+      }
+    );
   }, []);
 
   useEffect(() => {
@@ -72,6 +87,25 @@ export default function Sidebar({
     },
     {} as Record<string, Agent[]>
   );
+
+  const filteredConversations = conversations.filter((conversation) => {
+    if (!agentSearch.trim()) return true;
+    const q = agentSearch.toLowerCase();
+    return (
+      conversation.title?.toLowerCase().includes(q) ||
+      conversation.agentId.toLowerCase().includes(q)
+    );
+  });
+
+  function matchesAgentSearch(agent: Agent) {
+    if (!agentSearch.trim()) return true;
+    const q = agentSearch.toLowerCase();
+    return (
+      agent.name.toLowerCase().includes(q) ||
+      agent.description.toLowerCase().includes(q) ||
+      agent.id.toLowerCase().includes(q)
+    );
+  }
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -100,6 +134,24 @@ export default function Sidebar({
         >
           + New Chat
         </button>
+
+        {session && (
+          <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2.5">
+            <p className="text-[12px] text-white/75">{session.user.name}</p>
+            <p className="text-[10px] uppercase tracking-[0.16em] text-white/30 mt-1">
+              {session.user.role}
+            </p>
+          </div>
+        )}
+
+        <div className="mt-4">
+          <input
+            value={agentSearch}
+            onChange={(e) => setAgentSearch(e.target.value)}
+            placeholder={tab === "agents" ? "Find an agent" : "Find a conversation"}
+            className="w-full rounded-xl bg-white/[0.03] border border-white/[0.08] px-3 py-2.5 text-[13px] text-white/75 placeholder:text-white/25 focus:outline-none focus:border-brand-pink/30"
+          />
+        </div>
       </div>
 
       {/* Tabs */}
@@ -138,19 +190,26 @@ export default function Sidebar({
                   <div className="px-4 py-2 text-[10px] font-semibold tracking-[0.15em] uppercase text-white/30">
                     {TYPE_ICONS[type]} {TYPE_LABELS[type]}
                   </div>
-                  {items.map((agent) => (
+                  {items.filter(matchesAgentSearch).map((agent) => (
                     <button
                       key={agent.id}
                       onClick={() => onSelectAgent(agent.id)}
-                      className={`w-full text-left px-4 py-2.5 text-sm transition-all group ${
+                      className={`w-full text-left px-4 py-3 text-sm transition-all group ${
                         selectedAgent === agent.id
                           ? "bg-brand-pink/10 text-white border-r-2 border-brand-pink"
                           : "text-white/50 hover:bg-white/[0.03] hover:text-white/70"
                       }`}
                     >
                       <div className="font-medium text-[13px]">{agent.name}</div>
-                      <div className="text-[11px] text-white/30 mt-0.5 line-clamp-1 group-hover:text-white/40">
+                      <div className="text-[11px] text-white/30 mt-1 line-clamp-2 group-hover:text-white/40 leading-relaxed">
                         {agent.description}
+                      </div>
+                      <div className="text-[10px] uppercase tracking-[0.14em] text-white/20 mt-2">
+                        {agent.type === "system"
+                          ? "Best when you need routing"
+                          : agent.type === "design"
+                            ? "Best when you need specs or creative direction"
+                            : "Best when you need messaging or strategy"}
                       </div>
                     </button>
                   ))}
@@ -160,12 +219,12 @@ export default function Sidebar({
           </div>
         ) : (
           <div className="py-2">
-            {conversations.length === 0 ? (
+            {filteredConversations.length === 0 ? (
               <p className="px-4 py-8 text-sm text-white/30 text-center">
-                No conversations yet
+                {conversations.length === 0 ? "No conversations yet" : "No conversations match that search"}
               </p>
             ) : (
-              conversations.map((conv) => (
+              filteredConversations.map((conv) => (
                 <button
                   key={conv.id}
                   onClick={() => onSelectConversation(conv.id, conv.agentId)}
@@ -191,22 +250,28 @@ export default function Sidebar({
 
       {/* Footer */}
       <div className="p-3 border-t border-white/[0.06]">
-        <div className="flex gap-1">
-          <a
+        <div className="grid grid-cols-2 gap-1 mb-1">
+          <Link
+            href="/portal"
+            className="py-2 text-center text-[11px] text-white/40 hover:text-white/60 rounded-lg hover:bg-white/[0.03] transition-colors"
+          >
+            Portal
+          </Link>
+          <Link
             href="/knowledgebase"
-            className="flex-1 py-2 text-center text-[11px] text-white/40 hover:text-white/60 rounded-lg hover:bg-white/[0.03] transition-colors"
+            className="py-2 text-center text-[11px] text-white/40 hover:text-white/60 rounded-lg hover:bg-white/[0.03] transition-colors"
           >
             KB
-          </a>
-          <a
+          </Link>
+          <Link
             href="/resources"
-            className="flex-1 py-2 text-center text-[11px] text-white/40 hover:text-white/60 rounded-lg hover:bg-white/[0.03] transition-colors"
+            className="py-2 text-center text-[11px] text-white/40 hover:text-white/60 rounded-lg hover:bg-white/[0.03] transition-colors"
           >
-            Resources
-          </a>
+            Files
+          </Link>
           <button
             onClick={handleLogout}
-            className="flex-1 py-2 text-center text-[11px] text-white/40 hover:text-red-400 rounded-lg hover:bg-white/[0.03] transition-colors"
+            className="py-2 text-center text-[11px] text-white/40 hover:text-red-400 rounded-lg hover:bg-white/[0.03] transition-colors"
           >
             Sign Out
           </button>
