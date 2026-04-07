@@ -178,6 +178,14 @@ export default function Sidebar({
             >
               Files
             </Link>
+            {session?.user.role === "admin" && (
+              <Link
+                href="/admin"
+                className="text-[10px] text-white/25 hover:text-white/50 transition-colors"
+              >
+                Admin
+              </Link>
+            )}
           </div>
           <button
             onClick={handleLogout}
