@@ -19,12 +19,12 @@ interface ChatInterfaceProps {
 
 async function downloadConversation(
   messages: Message[],
-  format: "md" | "doc" | "pdf" | "pptx"
+  format: "md" | "doc" | "pdf" | "pptx" | "csv"
 ) {
-  // For PPTX, use the last assistant message as content (most likely to be the presentation)
+  // For PPTX/CSV, use the last assistant message as content
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
   const content =
-    format === "pptx" && lastAssistant
+    (format === "pptx" || format === "csv") && lastAssistant
       ? lastAssistant.content
       : messages
           .map((m) =>
@@ -41,7 +41,7 @@ async function downloadConversation(
     body: JSON.stringify({
       title,
       content:
-        format === "pptx"
+        format === "pptx" || format === "csv"
           ? content
           : `_Gratitude.com -- ${new Date().toLocaleDateString()}_\n\n---\n\n${content}`,
       format,
@@ -248,6 +248,13 @@ export default function ChatInterface({
                 title="Download as PDF"
               >
                 PDF
+              </button>
+              <button
+                onClick={() => void downloadConversation(messages, "csv")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white/60 hover:bg-white/[0.04] transition-all"
+                title="Download as CSV"
+              >
+                CSV
               </button>
               <button
                 onClick={() => void downloadConversation(messages, "pptx")}

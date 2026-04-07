@@ -55,7 +55,7 @@ function DownloadButton({
 }: {
   content: string;
   title: string;
-  format: "md" | "doc" | "pdf" | "pptx";
+  format: "md" | "doc" | "pdf" | "pptx" | "csv";
 }) {
   async function handleDownload() {
     const res = await fetch("/api/exports", {
@@ -140,17 +140,48 @@ function SaveButton({
   );
 }
 
+function CsvDownloadButton({ text, fileName }: { text: string; fileName?: string }) {
+  function handleDownload() {
+    const blob = new Blob([text], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName || `gratitude-export-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <button
+      onClick={handleDownload}
+      className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] text-brand-pink/70 hover:text-brand-pink hover:bg-brand-pink/[0.08] transition-all"
+      title="Download as CSV"
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+      Download CSV
+    </button>
+  );
+}
+
 function CodeBlock({ children, className }: { children: string; className?: string }) {
   const language = className?.replace("language-", "") || "";
+  const isCsv = language === "csv" || (!language && children.includes(",") && children.split("\n").length > 2 && children.split("\n").every((line) => !line.trim() || line.split(",").length > 1));
 
   return (
     <div className="relative group/code my-3 rounded-lg overflow-hidden border border-white/[0.06]">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-1.5 bg-white/[0.03] border-b border-white/[0.04]">
         <span className="text-[10px] font-medium uppercase tracking-wider text-white/25">
-          {language || "code"}
+          {language || (isCsv ? "csv" : "code")}
         </span>
-        <CopyButton text={children} label="Copy code" />
+        <div className="flex items-center gap-1">
+          {isCsv && <CsvDownloadButton text={children} />}
+          <CopyButton text={children} label="Copy code" />
+        </div>
       </div>
       {/* Code */}
       <pre className="!m-0 !rounded-none !border-0 overflow-x-auto">
@@ -233,6 +264,11 @@ export default function ChatMessage({
               content={content}
               title={`${agentName} Output`}
               format="pdf"
+            />
+            <DownloadButton
+              content={content}
+              title={`${agentName} Output`}
+              format="csv"
             />
             <DownloadButton
               content={content}

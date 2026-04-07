@@ -12,12 +12,31 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const format = body.format as "md" | "doc" | "pdf" | "pptx";
+    const format = body.format as "md" | "doc" | "pdf" | "pptx" | "csv";
     const title = String(body.title || "Gratitude Output");
     const content = String(body.content || "");
 
-    if (!format || !["md", "doc", "pdf", "pptx"].includes(format)) {
+    if (!format || !["md", "doc", "pdf", "pptx", "csv"].includes(format)) {
       return NextResponse.json({ error: "Invalid format" }, { status: 400 });
+    }
+
+    // CSV export - extract CSV from code blocks or use raw content
+    if (format === "csv") {
+      // Try to extract CSV from a code block
+      const csvMatch = content.match(/```(?:csv)?\s*\n([\s\S]*?)\n```/);
+      const csvContent = csvMatch ? csvMatch[1] : content;
+      const safeFileName =
+        title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "") || "gratitude-export";
+
+      return new NextResponse(csvContent, {
+        headers: {
+          "Content-Type": "text/csv; charset=utf-8",
+          "Content-Disposition": `attachment; filename="${safeFileName}.csv"`,
+        },
+      });
     }
 
     // PPTX generation
