@@ -7,6 +7,7 @@ import {
   jsonb,
   pgEnum,
   integer,
+  vector,
 } from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum("user_role", [
@@ -69,6 +70,9 @@ export const conversations = pgTable("conversations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   enriched: boolean("enriched").default(false).notNull(),
+  // Watermark: how many messages have been through enrichment. Replaces the
+  // once-ever `enriched` boolean so long conversations keep contributing.
+  enrichedThrough: integer("enriched_through").default(0).notNull(),
 });
 
 export const messages = pgTable("messages", {
@@ -98,6 +102,13 @@ export const knowledgebaseEntries = pgTable("knowledgebase_entries", {
   tags: jsonb("tags").$type<string[]>().default([]),
   sourceType: text("source_type").default("manual").notNull(),
   sourceResourceId: uuid("source_resource_id"),
+  // Semantic retrieval (Gemini text-embedding-004, 768 dims)
+  embedding: vector("embedding", { dimensions: 768 }),
+  // Freshness: campaign results and sponsor info age out; evergreen entries stay null
+  expiresAt: timestamp("expires_at"),
+  // Quality signals: how often this entry has been injected into prompts
+  usageCount: integer("usage_count").default(0).notNull(),
+  lastUsedAt: timestamp("last_used_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
