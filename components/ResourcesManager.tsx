@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "./Toaster";
 
 interface ResourceItem {
   id: string;
@@ -84,7 +85,11 @@ export default function ResourcesManager() {
         setTags("");
         setFile(null);
         await loadResources();
+      } else {
+        toast("Upload failed. Please try again.");
       }
+    } catch {
+      toast("Upload failed. Check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -103,7 +108,10 @@ export default function ResourcesManager() {
   }
 
   async function handleDelete(id: string) {
-    await fetch(`/api/resources/${id}`, { method: "DELETE" });
+    // Deletion is permanent - match the confirm pattern conversations already use
+    if (!window.confirm("Delete this file? This can't be undone.")) return;
+    const res = await fetch(`/api/resources/${id}`, { method: "DELETE" });
+    if (!res.ok) toast("Delete failed. Please try again.");
     await loadResources();
   }
 
@@ -147,9 +155,15 @@ export default function ResourcesManager() {
             onChange={(e) => setVisibility(e.target.value as "private" | "internal" | "partner")}
             className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
           >
+            {/* Partners can only upload private files (server enforces this) -
+                don't show options that would silently be overridden */}
             <option value="private">Private</option>
-            <option value="internal">Internal</option>
-            <option value="partner">Partner</option>
+            {session?.user.role !== "partner" && (
+              <>
+                <option value="internal">Internal</option>
+                <option value="partner">Partner</option>
+              </>
+            )}
           </select>
         </div>
 

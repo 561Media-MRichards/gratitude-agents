@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { toast } from "./Toaster";
 
 interface Conversation {
   id: string;
@@ -39,21 +40,33 @@ export default function Sidebar({
   const router = useRouter();
   const pathname = usePathname();
 
+  const loadConversations = () =>
+    fetch("/api/conversations")
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`status ${r.status}`);
+        const data = await r.json();
+        if (Array.isArray(data)) setConversations(data);
+      })
+      .catch(() => {
+        // Expired sessions get redirected to the login page by middleware,
+        // which makes r.json() fail - tell the user instead of rendering
+        // a silently empty list
+        toast("Couldn't load conversations. Try refreshing or signing in again.");
+      });
+
   useEffect(() => {
     fetch("/api/session").then(async (res) => {
       if (res.ok) setSession(await res.json());
     });
-    fetch("/api/conversations")
-      .then((r) => r.json())
-      .then(setConversations);
+    void loadConversations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (conversationId) {
-      fetch("/api/conversations")
-        .then((r) => r.json())
-        .then(setConversations);
+      void loadConversations();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);
 
   const filtered = conversations.filter((c) => {

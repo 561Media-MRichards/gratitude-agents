@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
+import { toast } from "./Toaster";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -64,7 +65,10 @@ function DownloadButton({
       body: JSON.stringify({ content, title, format }),
     });
 
-    if (!res.ok) return;
+    if (!res.ok) {
+      toast(`${format.toUpperCase()} export failed. Please try again.`);
+      return;
+    }
 
     const blob = await res.blob();
     const disposition = res.headers.get("Content-Disposition") || "";
@@ -255,7 +259,10 @@ function XlsxDownloadButton({ text, title }: { text: string; title?: string }) {
           format: "xlsx",
         }),
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        toast("Excel export failed. Please try again.");
+        return;
+      }
       const blob = await res.blob();
       const disposition = res.headers.get("Content-Disposition") || "";
       const match = disposition.match(/filename="([^"]+)"/);
@@ -371,9 +378,9 @@ export default function ChatMessage({
           </ReactMarkdown>
         </div>
 
-        {/* Action bar — context-aware formats */}
+        {/* Action bar — context-aware formats; visible by default on touch devices, hover-reveal on desktop */}
         {content && !isStreaming && (
-          <div className="flex items-center gap-1 mt-2 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-200">
+          <div className="flex items-center gap-1 mt-2 opacity-100 md:opacity-0 md:group-hover/msg:opacity-100 transition-opacity duration-200">
             <CopyButton text={content} label="Copy" />
             <MessageExportButtons content={content} agentName={agentName} conversationId={conversationId} />
           </div>

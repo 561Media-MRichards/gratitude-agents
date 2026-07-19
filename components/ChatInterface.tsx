@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import ChatMessage from "./ChatMessage";
+import { toast } from "./Toaster";
 
 interface Message {
   id?: string;
@@ -48,7 +49,10 @@ async function downloadConversation(
     }),
   });
 
-  if (!res.ok) return;
+  if (!res.ok) {
+    toast(`${format.toUpperCase()} export failed. Please try again.`);
+    return;
+  }
 
   const blob = await res.blob();
   const disposition = res.headers.get("Content-Disposition") || "";
@@ -188,6 +192,25 @@ export default function ChatInterface({
   useEffect(() => {
     textareaRef.current?.focus();
   }, [agentId]);
+
+  // Guide "Try asking" / "Try this workflow" buttons stash their prompt in
+  // sessionStorage before navigating here - prefill it so the user lands with
+  // the prompt ready to send (previously the key was written but never read)
+  useEffect(() => {
+    const starter = sessionStorage.getItem("gratitude_starter_prompt");
+    if (starter) {
+      sessionStorage.removeItem("gratitude_starter_prompt");
+      setInput(starter);
+      requestAnimationFrame(() => {
+        const el = textareaRef.current;
+        if (el) {
+          el.focus();
+          el.style.height = "auto";
+          el.style.height = Math.min(el.scrollHeight, 200) + "px";
+        }
+      });
+    }
+  }, []);
 
   function resizeTextarea() {
     const el = textareaRef.current;

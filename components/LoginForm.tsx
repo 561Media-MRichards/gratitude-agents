@@ -43,10 +43,19 @@ export default function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email address"
+          autoComplete="email"
           className="w-full px-4 py-3.5 rounded-xl text-[15px] text-white placeholder:text-white/30 transition-all duration-300 focus:outline-none"
           style={{
             background: "rgba(255, 255, 255, 0.05)",
             border: "1px solid rgba(255, 255, 255, 0.1)",
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = "rgba(254, 49, 132, 0.5)";
+            e.target.style.boxShadow = "0 0 0 3px rgba(254, 49, 132, 0.1)";
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = "rgba(255, 255, 255, 0.1)";
+            e.target.style.boxShadow = "none";
           }}
           autoFocus
         />
@@ -58,6 +67,7 @@ export default function LoginForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
+          autoComplete="current-password"
           className="w-full px-4 py-3.5 rounded-xl text-[15px] text-white placeholder:text-white/30 transition-all duration-300 focus:outline-none"
           style={{
             background: "rgba(255, 255, 255, 0.05)",

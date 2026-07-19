@@ -185,8 +185,8 @@ const TIPS = [
     category: "Research",
   },
   {
-    title: "Each conversation is private",
-    body: "Your conversations and files are only visible to you. Nobody else on the team can see your work unless you share the exported files.",
+    title: "Your conversations stay yours",
+    body: "Teammates don't see your conversations or files in their workspace. Approved key learnings (never your full chats) can be added to the shared knowledgebase so everyone's results improve over time.",
     category: "Privacy",
   },
   {
@@ -248,9 +248,10 @@ export default function GuidePage() {
   const [activeSection, setActiveSection] = useState<BoardSection>("capabilities");
 
   function handleTryPrompt(prompt: string) {
-    window.location.href = `/chat`;
-    // Store the prompt to auto-send after navigation
+    // Store the prompt BEFORE navigating - ChatInterface reads this key on
+    // mount and prefills the input, ready to send
     sessionStorage.setItem("gratitude_starter_prompt", prompt);
+    window.location.href = `/chat`;
   }
 
   const sections: { id: BoardSection; label: string; icon: string }[] = [
