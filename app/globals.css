@@ -16,8 +16,10 @@
   --color-dark-600: #242424;
   --color-dark-500: #2a2a2a;
 
-  --font-display: "Anton", Impact, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  /* next/font exposes hashed family names through these variables (see layout.tsx).
+     Referencing "Anton"/"Inter" by name silently fell back to Impact/system-ui. */
+  --font-display: var(--font-anton), "Anton", Impact, sans-serif;
+  --font-body: var(--font-inter), "Inter", system-ui, sans-serif;
 }
 
 /* Scrollbar styling */

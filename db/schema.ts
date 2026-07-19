@@ -122,6 +122,9 @@ export const resources = pgTable("resources", {
   externalUrl: text("external_url"),
   textContent: text("text_content"),
   binaryContentBase64: text("binary_content_base64"),
+  // Vercel Blob URL - new files/images store here; binaryContentBase64 remains
+  // only as a legacy fallback for rows created before the blob migration
+  blobUrl: text("blob_url"),
   tags: jsonb("tags").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

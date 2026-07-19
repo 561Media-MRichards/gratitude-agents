@@ -333,12 +333,7 @@ export default function ChatMessage({
   if (role === "user") {
     return (
       <div className="flex justify-end group/msg">
-        <div className="max-w-[75%] px-4 py-3 rounded-2xl rounded-br-sm text-white/85 text-[15px] leading-relaxed"
-          style={{
-            background: "rgba(254, 49, 132, 0.12)",
-            border: "1px solid rgba(254, 49, 132, 0.18)",
-          }}
-        >
+        <div className="max-w-[75%] px-4 py-3 rounded-2xl rounded-br-md text-white/90 text-[15px] leading-relaxed bg-white/[0.06] border border-white/[0.07]">
           <div className="whitespace-pre-wrap">{content}</div>
         </div>
       </div>
@@ -366,6 +361,22 @@ export default function ChatMessage({
     },
     pre({ children }) {
       return <>{children}</>;
+    },
+    // Generated images embed as markdown; render them as clean bordered
+    // previews that link to the full-size file
+    img({ src, alt }) {
+      if (!src || typeof src !== "string") return null;
+      return (
+        <a href={src.replace("?inline=1", "")} target="_blank" rel="noreferrer">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={alt || "Generated image"}
+            className="max-w-full rounded-xl border border-white/[0.08] my-2"
+            loading="lazy"
+          />
+        </a>
+      );
     },
   };
 

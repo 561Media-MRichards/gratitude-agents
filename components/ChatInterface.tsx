@@ -2,7 +2,96 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import ChatMessage from "./ChatMessage";
+import GratitudeMark from "./GratitudeMark";
 import { toast } from "./Toaster";
+
+function timeOfDayGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 5) return "Working late";
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+interface StarterTask {
+  label: string;
+  hint: string;
+  prompt: string;
+  icon: React.ReactNode;
+}
+
+// 16px stroke icons, consistent 1.5 weight
+const starterTasks: StarterTask[] = [
+  {
+    label: "Content calendar",
+    hint: "Plan next week's posts across channels",
+    prompt: "Build a content calendar for next week",
+    icon: (
+      <>
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </>
+    ),
+  },
+  {
+    label: "Sponsor pitch deck",
+    hint: "Slides you can export straight to PowerPoint",
+    prompt: "Create a sponsor pitch deck",
+    icon: (
+      <>
+        <line x1="6" y1="20" x2="6" y2="14" />
+        <line x1="12" y1="20" x2="12" y2="8" />
+        <line x1="18" y1="20" x2="18" y2="4" />
+      </>
+    ),
+  },
+  {
+    label: "Nurture email sequence",
+    hint: "A multi-touch sequence in the Gratitude voice",
+    prompt: "Write a nurture email sequence",
+    icon: (
+      <>
+        <rect x="2" y="4" width="20" height="16" rx="2" />
+        <polyline points="22 6 12 13 2 6" />
+      </>
+    ),
+  },
+  {
+    label: "Trend research",
+    hint: "What's moving in corporate social impact",
+    prompt: "Research latest trends in corporate social impact",
+    icon: (
+      <>
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </>
+    ),
+  },
+  {
+    label: "Landing page copy",
+    hint: "Headlines, sections, and calls to action",
+    prompt: "Draft copy for our landing page",
+    icon: (
+      <>
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+      </>
+    ),
+  },
+  {
+    label: "Social rollout plan",
+    hint: "Channel-by-channel launch schedule",
+    prompt: "Generate a social media rollout plan",
+    icon: (
+      <>
+        <path d="M3 11l18-5v12L3 14v-3z" />
+        <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+      </>
+    ),
+  },
+];
 
 interface Message {
   id?: string;
@@ -174,9 +263,11 @@ export default function ChatInterface({
   setMessages,
 }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
+  const [firstName, setFirstName] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
   const [searching, setSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [generatingImage, setGeneratingImage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -186,12 +277,26 @@ export default function ChatInterface({
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
+    // Only auto-scroll when there is a conversation; scrolling on mount
+    // clips the top of the empty-state greeting
+    if (messages.length > 0) scrollToBottom();
   }, [messages, scrollToBottom]);
 
   useEffect(() => {
     textareaRef.current?.focus();
   }, [agentId]);
+
+  // First name for the empty-state greeting
+  useEffect(() => {
+    fetch("/api/session")
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json();
+        const name: string | undefined = data?.user?.name;
+        if (name) setFirstName(name.split(" ")[0]);
+      })
+      .catch(() => {});
+  }, []);
 
   // Guide "Try asking" / "Try this workflow" buttons stash their prompt in
   // sessionStorage before navigating here - prefill it so the user lands with
@@ -270,9 +375,13 @@ export default function ChatInterface({
                 if (parsed.searchQuery) {
                   setSearchQuery(parsed.searchQuery);
                 }
+                if (parsed.generatingImage) {
+                  setGeneratingImage(true);
+                }
                 if (parsed.text) {
                   setSearching(false);
                   setSearchQuery("");
+                  setGeneratingImage(false);
                   setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[updated.length - 1];
@@ -316,6 +425,7 @@ export default function ChatInterface({
       setStreaming(false);
       setSearching(false);
       setSearchQuery("");
+      setGeneratingImage(false);
     }
   }
 
@@ -331,30 +441,17 @@ export default function ChatInterface({
   return (
     <div className="flex-1 flex flex-col h-screen bg-dark-950">
       {/* Header */}
-      <div className="shrink-0 px-6 py-3 border-b border-white/[0.06] bg-dark-900/50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
-              style={{
-                background: "rgba(254, 49, 132, 0.1)",
-                border: "1px solid rgba(254, 49, 132, 0.2)",
-              }}
-            >
-              &#x2728;
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-white/90">Gratitude</h2>
-              <p className="text-[11px] text-white/40 truncate max-w-lg">
-                Ask me anything - I'll bring the right expertise behind the scenes
-              </p>
-            </div>
+      <div className="shrink-0 h-[52px] px-6 border-b border-white/[0.06] bg-dark-900/50 flex items-center justify-between">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-white/[0.03] border border-white/[0.08]">
+            <GratitudeMark size={13} className="text-white/80" />
           </div>
-
-          {hasMessages && (
-            <HeaderExportButtons messages={messages} downloadConversation={downloadConversation} />
-          )}
+          <h2 className="text-[13px] font-medium text-white/85">Gratitude</h2>
         </div>
+
+        {hasMessages && (
+          <HeaderExportButtons messages={messages} downloadConversation={downloadConversation} />
+        )}
       </div>
 
       {/* Messages */}
@@ -364,53 +461,65 @@ export default function ChatInterface({
       >
         <div className="max-w-3xl mx-auto px-6 py-6 space-y-6">
           {!hasMessages && (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-5"
-                style={{
-                  background: "rgba(254, 49, 132, 0.1)",
-                  border: "1px solid rgba(254, 49, 132, 0.15)",
-                }}
-              >
-                &#x2728;
-              </div>
-              <h3 className="font-display text-xl uppercase text-gradient mb-2">
-                Gratitude
+            <div className="pt-8 sm:pt-12 pb-8">
+              <h3 className="font-display uppercase text-[26px] sm:text-[30px] leading-[1.05] tracking-[-0.01em] text-white">
+                {timeOfDayGreeting()}
+                {firstName && <span className="text-white/40">, {firstName}</span>}
               </h3>
-              <p className="text-sm text-white/35 max-w-md leading-relaxed mb-8">
-                Your workspace assistant for copy, strategy, design direction, and anything else you need done.
+              <p className="mt-3 text-[14px] text-white/45 leading-relaxed max-w-md">
+                Draft copy, build a deck, plan a campaign, or pull research.
+                Describe the deliverable and Gratitude gets to work.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-xl w-full">
-                {[
-                  { label: "Build a content calendar for next week", icon: "📅" },
-                  { label: "Create a sponsor pitch deck", icon: "📊" },
-                  { label: "Write a nurture email sequence", icon: "✉️" },
-                  { label: "Research latest trends in corporate social impact", icon: "🔍" },
-                  { label: "Draft copy for our landing page", icon: "📝" },
-                  { label: "Generate a social media rollout plan", icon: "📱" },
-                ].map((prompt) => (
-                  <button
-                    key={prompt.label}
-                    onClick={() => handleSend(prompt.label)}
-                    className="flex items-start gap-3 px-4 py-3 rounded-xl text-left text-[13px] text-white/50 hover:text-white/75 transition-all group"
-                    style={{
-                      background: "rgba(255,255,255,0.02)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = "rgba(254, 49, 132, 0.25)";
-                      e.currentTarget.style.background = "rgba(254, 49, 132, 0.04)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
-                      e.currentTarget.style.background = "rgba(255,255,255,0.02)";
-                    }}
-                  >
-                    <span className="text-base mt-0.5 shrink-0">{prompt.icon}</span>
-                    <span className="leading-snug">{prompt.label}</span>
-                  </button>
-                ))}
+              <div className="mt-9 max-w-md">
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/25 mb-2 px-3">
+                  Start with a task
+                </p>
+                <div className="flex flex-col">
+                  {starterTasks.map((task) => (
+                    <button
+                      key={task.label}
+                      onClick={() => handleSend(task.prompt)}
+                      className="group flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-white/[0.04]"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="shrink-0 text-white/30 group-hover:text-white/70 transition-colors"
+                      >
+                        {task.icon}
+                      </svg>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[13px] text-white/75 group-hover:text-white transition-colors">
+                          {task.label}
+                        </span>
+                        <span className="block text-[12px] text-white/30 truncate">
+                          {task.hint}
+                        </span>
+                      </span>
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="shrink-0 text-white/40 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                      >
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -426,7 +535,7 @@ export default function ChatInterface({
             />
           ))}
 
-          {streaming && (messages[messages.length - 1]?.content === "" || searching) && (
+          {streaming && (messages[messages.length - 1]?.content === "" || searching || generatingImage) && (
             <div className="flex items-start gap-2.5 px-1">
               <div className="flex gap-1 mt-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-brand-pink/70 animate-pulse" />
@@ -441,7 +550,11 @@ export default function ChatInterface({
               </div>
               <div>
                 <span className="text-[11px] text-white/25">
-                  {searching ? "Searching the web..." : "Gratitude is working on it..."}
+                  {generatingImage
+                    ? "Creating your image..."
+                    : searching
+                      ? "Searching the web..."
+                      : "Gratitude is working on it..."}
                 </span>
                 {searching && searchQuery && (
                   <p className="text-[11px] text-brand-pink/40 mt-0.5 italic">
@@ -459,13 +572,7 @@ export default function ChatInterface({
       {/* Input */}
       <div className="shrink-0 border-t border-white/[0.06] bg-dark-900/30">
         <div className="max-w-3xl mx-auto px-6 py-4">
-          <div
-            className="flex items-end gap-3 rounded-2xl px-4 py-3 transition-all"
-            style={{
-              background: "rgba(255, 255, 255, 0.03)",
-              border: "1px solid rgba(255, 255, 255, 0.06)",
-            }}
-          >
+          <div className="flex items-end gap-3 rounded-2xl px-4 py-3 bg-white/[0.03] border border-white/[0.07] transition-colors focus-within:border-white/[0.16] focus-within:bg-white/[0.04]">
             <textarea
               ref={textareaRef}
               value={input}

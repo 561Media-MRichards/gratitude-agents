@@ -35,69 +35,55 @@ export default function LoginForm() {
     }
   }
 
+  const inputClasses =
+    "w-full px-3.5 py-3 rounded-lg text-[15px] text-white bg-white/[0.05] border border-white/[0.1] placeholder:text-white/25 transition-[border-color,box-shadow] duration-200 focus:outline-none focus:border-brand-pink/50 focus:shadow-[0_0_0_3px_rgba(254,49,132,0.1)]";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <label htmlFor="login-email" className="block text-[12px] font-medium text-white/50">
+          Email
+        </label>
         <input
+          id="login-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email address"
+          placeholder="you@gratitude.com"
           autoComplete="email"
-          className="w-full px-4 py-3.5 rounded-xl text-[15px] text-white placeholder:text-white/30 transition-all duration-300 focus:outline-none"
-          style={{
-            background: "rgba(255, 255, 255, 0.05)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = "rgba(254, 49, 132, 0.5)";
-            e.target.style.boxShadow = "0 0 0 3px rgba(254, 49, 132, 0.1)";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = "rgba(255, 255, 255, 0.1)";
-            e.target.style.boxShadow = "none";
-          }}
+          className={inputClasses}
           autoFocus
         />
       </div>
 
-      <div>
+      <div className="space-y-1.5">
+        <label htmlFor="login-password" className="block text-[12px] font-medium text-white/50">
+          Password
+        </label>
         <input
+          id="login-password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
           autoComplete="current-password"
-          className="w-full px-4 py-3.5 rounded-xl text-[15px] text-white placeholder:text-white/30 transition-all duration-300 focus:outline-none"
-          style={{
-            background: "rgba(255, 255, 255, 0.05)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = "rgba(254, 49, 132, 0.5)";
-            e.target.style.boxShadow = "0 0 0 3px rgba(254, 49, 132, 0.1)";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = "rgba(255, 255, 255, 0.1)";
-            e.target.style.boxShadow = "none";
-          }}
+          className={inputClasses}
         />
       </div>
 
       {error && (
-        <p className="text-sm text-red-400">{error}</p>
+        <p className="text-[13px] text-red-400">{error}</p>
       )}
 
       <button
         type="submit"
         disabled={loading || !password || !email}
-        className="w-full py-3.5 px-6 rounded-full font-semibold text-white text-[15px] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5 will-change-transform"
+        className="w-full mt-2 py-3 px-6 rounded-full font-semibold text-white text-[15px] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 will-change-transform"
         style={{
           background: "linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)",
           boxShadow: "0 10px 40px rgba(254, 49, 132, 0.3)",
         }}
       >
-        {loading ? "Signing in..." : "Sign In"}
+        {loading ? "Signing in..." : "Sign in"}
       </button>
     </form>
   );

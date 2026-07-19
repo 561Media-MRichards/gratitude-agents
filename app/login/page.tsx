@@ -22,35 +22,25 @@ export default function LoginPage() {
       <div
         className="absolute top-[20%] right-[-10%] w-[500px] h-[500px] rounded-full pointer-events-none will-change-transform"
         style={{
-          background: "radial-gradient(ellipse, rgba(236, 114, 17, 0.15) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(236, 114, 17, 0.12) 0%, transparent 70%)",
           filter: "blur(120px)",
-        }}
-      />
-      <div
-        className="absolute bottom-[-5%] left-[-5%] w-[400px] h-[400px] rounded-full pointer-events-none will-change-transform"
-        style={{
-          background: "radial-gradient(ellipse, rgba(254, 49, 132, 0.1) 0%, transparent 70%)",
-          filter: "blur(100px)",
         }}
       />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center gap-10 animate-reveal">
+      <div className="relative z-10 flex flex-col items-center animate-reveal px-6 w-full">
         {/* Logo */}
         <Image
           src="/gratitude-white.svg"
           alt="Gratitude"
-          width={260}
-          height={52}
+          width={220}
+          height={44}
           priority
         />
 
-        {/* Title section */}
-        <div className="text-center space-y-3">
-          <p className="text-white/40 text-sm tracking-wide">
-            Sign in to start a conversation
-          </p>
-        </div>
+        <p className="text-white/40 text-[13px] tracking-wide mt-5 mb-9">
+          Sign in to your team workspace
+        </p>
 
         {/* Login form card — matches gratitude.com modal styling */}
         <div

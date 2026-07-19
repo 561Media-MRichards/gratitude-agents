@@ -13,8 +13,10 @@ import {
   isPrivilegedUser,
 } from "@/lib/permissions";
 import { detectSpecialistDomain } from "@/lib/detect-domain";
+import { generateImage, type ImageAspectRatio } from "@/lib/image-gen";
 
-export const maxDuration = 60;
+// Image generation adds ~15s per image on top of model turns
+export const maxDuration = 120;
 
 export async function POST(request: Request) {
   try {
@@ -222,106 +224,179 @@ export async function POST(request: Request) {
     const webSearchNote =
       "\n\n## Web Search\nYou have access to web search. Use it when the user asks about current events, recent data, live information, competitor research, industry stats, or anything that benefits from up-to-date information. Do not tell the user you are searching - just do it and incorporate the results naturally. When you cite information from search results, mention the source naturally in your response (e.g., 'According to Forbes...' or 'A recent report from Nonprofit Quarterly found...').";
 
-    const systemPrompt = `${brandContext}${kbSection}\n\n---\n\n${agent.body}${specialistBody}${endUserBehaviorNote}${conciergeNote}${presentationNote}${webSearchNote}`;
+    const imageGenNote =
+      "\n\n## Image Generation\nYou can generate real images with the generate_image tool. Use it when the user asks for a graphic, social media visual, hero image, background art, illustration, or any other image. Write a detailed, art-directed prompt that follows the Gratitude visual system (dark backgrounds, pink #FE3184 to orange #ec7211 gradient glow accents, premium and modern - never navy). Pick the aspect ratio that fits the use: 1:1 for Instagram posts, 16:9 for banners/YouTube/presentations, 9:16 for stories/reels, 4:3 or 3:4 for general use. After the tool returns, embed the image in your reply using the exact markdown the tool result gives you, then briefly describe what you created. If the user wants changes, call the tool again with a revised prompt. Note: image models cannot render text reliably - avoid asking for words inside the image; recommend text overlays be added in design tools instead.";
 
-    // Stream response with web search enabled
+    const systemPrompt = `${brandContext}${kbSection}\n\n---\n\n${agent.body}${specialistBody}${endUserBehaviorNote}${conciergeNote}${presentationNote}${webSearchNote}${imageGenNote}`;
+
+    // Stream response with web search + image generation enabled.
+    // Image generation is a client tool, so the model can stop with
+    // stop_reason "tool_use" - we run the tool, feed back the result, and
+    // continue the loop until it produces a final text response.
     const anthropic = new Anthropic();
-    const stream = anthropic.messages.stream({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 8192,
-      system: systemPrompt,
-      messages: apiMessages,
-      tools: [
-        {
-          type: "web_search_20250305",
-          name: "web_search",
-          max_uses: 3,
+    const tools = [
+      {
+        type: "web_search_20250305" as const,
+        name: "web_search" as const,
+        max_uses: 3,
+      },
+      {
+        name: "generate_image",
+        description:
+          "Generate a real image (PNG) from a detailed art-direction prompt. Returns markdown to embed the image in your reply. Use for social graphics, hero images, backgrounds, illustrations, and campaign art.",
+        input_schema: {
+          type: "object" as const,
+          properties: {
+            prompt: {
+              type: "string",
+              description:
+                "Detailed art-direction prompt: subject, composition, lighting, color palette, style. Follow the Gratitude visual system.",
+            },
+            aspect_ratio: {
+              type: "string",
+              enum: ["1:1", "16:9", "9:16", "4:3", "3:4"],
+              description: "Aspect ratio for the intended placement",
+            },
+          },
+          required: ["prompt"],
         },
-      ],
-    });
+      },
+    ] as Anthropic.Messages.ToolUnion[];
 
     let fullResponse = "";
     const citations: { url: string; title: string }[] = [];
-    let searchQueryBuffer = "";
-    let inServerToolUse = false;
+    const MAX_TOOL_TURNS = 4;
 
     const readableStream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
+        const send = (payload: Record<string, unknown>) =>
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ ...payload, conversationId: convId })}\n\n`)
+          );
+
         try {
-          for await (const event of stream) {
-            if (event.type === "content_block_start") {
-              const block = event.content_block as { type: string };
-              if (block.type === "server_tool_use") {
-                inServerToolUse = true;
-                searchQueryBuffer = "";
-                controller.enqueue(
-                  encoder.encode(
-                    `data: ${JSON.stringify({ searching: true, conversationId: convId })}\n\n`
-                  )
-                );
-              } else {
-                inServerToolUse = false;
-              }
-            }
+          let loopMessages: Anthropic.Messages.MessageParam[] = [...apiMessages];
 
-            if (event.type === "content_block_delta") {
-              const delta = event.delta as { type: string; text?: string; partial_json?: string };
+          for (let turn = 0; turn < MAX_TOOL_TURNS; turn++) {
+            const stream = anthropic.messages.stream({
+              model: "claude-sonnet-4-20250514",
+              max_tokens: 8192,
+              system: systemPrompt,
+              messages: loopMessages,
+              tools,
+            });
 
-              // Capture search query from input_json_delta
-              if (delta.type === "input_json_delta" && inServerToolUse && delta.partial_json) {
-                searchQueryBuffer += delta.partial_json;
-                // Try to extract the query as it streams in
-                const qMatch = searchQueryBuffer.match(/"query"\s*:\s*"([^"]+)/);
-                if (qMatch) {
-                  controller.enqueue(
-                    encoder.encode(
-                      `data: ${JSON.stringify({ searchQuery: qMatch[1], conversationId: convId })}\n\n`
-                    )
-                  );
+            let searchQueryBuffer = "";
+            let inServerToolUse = false;
+
+            for await (const event of stream) {
+              if (event.type === "content_block_start") {
+                const block = event.content_block as { type: string };
+                if (block.type === "server_tool_use") {
+                  inServerToolUse = true;
+                  searchQueryBuffer = "";
+                  send({ searching: true });
+                } else {
+                  inServerToolUse = false;
                 }
               }
 
-              if (delta.type === "text_delta" && delta.text) {
-                fullResponse += delta.text;
-                controller.enqueue(
-                  encoder.encode(
-                    `data: ${JSON.stringify({ text: delta.text, conversationId: convId })}\n\n`
-                  )
-                );
+              if (event.type === "content_block_delta") {
+                const delta = event.delta as { type: string; text?: string; partial_json?: string };
+
+                // Capture search query from input_json_delta
+                if (delta.type === "input_json_delta" && inServerToolUse && delta.partial_json) {
+                  searchQueryBuffer += delta.partial_json;
+                  const qMatch = searchQueryBuffer.match(/"query"\s*:\s*"([^"]+)/);
+                  if (qMatch) {
+                    send({ searchQuery: qMatch[1] });
+                  }
+                }
+
+                if (delta.type === "text_delta" && delta.text) {
+                  fullResponse += delta.text;
+                  send({ text: delta.text });
+                }
               }
             }
 
-            // Collect citations from text blocks when they finish
-            if (event.type === "content_block_stop") {
-              // Access the final message to extract citations after stream ends
-            }
-          }
+            const finalMessage = await stream.finalMessage();
 
-          // After stream completes, extract citations from the final message
-          const finalMessage = await stream.finalMessage();
-          for (const block of finalMessage.content) {
-            if (block.type === "text" && "citations" in block && Array.isArray(block.citations)) {
-              for (const cite of block.citations) {
-                if ("url" in cite && "title" in cite) {
-                  const url = cite.url as string;
-                  const title = cite.title as string;
-                  // Deduplicate
-                  if (!citations.some((c) => c.url === url)) {
-                    citations.push({ url, title });
+            // Collect citations from this turn's text blocks
+            for (const block of finalMessage.content) {
+              if (block.type === "text" && "citations" in block && Array.isArray(block.citations)) {
+                for (const cite of block.citations) {
+                  if ("url" in cite && "title" in cite) {
+                    const url = cite.url as string;
+                    const title = cite.title as string;
+                    if (!citations.some((c) => c.url === url)) {
+                      citations.push({ url, title });
+                    }
                   }
                 }
               }
             }
+
+            if (finalMessage.stop_reason !== "tool_use") {
+              break;
+            }
+
+            // Run requested client tools, feed results back, continue the loop
+            const toolUses = finalMessage.content.filter(
+              (b): b is Anthropic.Messages.ToolUseBlock => b.type === "tool_use"
+            );
+            const toolResults: Anthropic.Messages.ToolResultBlockParam[] = [];
+
+            for (const toolUse of toolUses) {
+              if (toolUse.name === "generate_image") {
+                const input = toolUse.input as { prompt?: string; aspect_ratio?: string };
+                const validRatios = ["1:1", "16:9", "9:16", "4:3", "3:4"];
+                send({ generatingImage: true });
+                try {
+                  const image = await generateImage({
+                    prompt: input.prompt || "",
+                    aspectRatio: validRatios.includes(input.aspect_ratio || "")
+                      ? (input.aspect_ratio as ImageAspectRatio)
+                      : "1:1",
+                    ownerId: session.userId,
+                    conversationId: convId,
+                  });
+                  toolResults.push({
+                    type: "tool_result",
+                    tool_use_id: toolUse.id,
+                    content: `Image generated successfully. Embed it in your reply using exactly this markdown: ![${image.title}](/api/resources/${image.resourceId}/download?inline=1)`,
+                  });
+                } catch (imageErr) {
+                  console.error("Image generation failed:", imageErr);
+                  toolResults.push({
+                    type: "tool_result",
+                    tool_use_id: toolUse.id,
+                    is_error: true,
+                    content:
+                      "Image generation failed. Briefly let the user know the image could not be created right now and continue helping with the rest of their request.",
+                  });
+                }
+              } else {
+                toolResults.push({
+                  type: "tool_result",
+                  tool_use_id: toolUse.id,
+                  is_error: true,
+                  content: `Unknown tool: ${toolUse.name}`,
+                });
+              }
+            }
+
+            loopMessages = [
+              ...loopMessages,
+              { role: "assistant", content: finalMessage.content },
+              { role: "user", content: toolResults },
+            ];
           }
 
           // Send citations if any were collected
           if (citations.length > 0) {
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({ citations, conversationId: convId })}\n\n`
-              )
-            );
+            send({ citations });
             // Append citation links to the saved response
             fullResponse +=
               "\n\n---\n**Sources:** " +

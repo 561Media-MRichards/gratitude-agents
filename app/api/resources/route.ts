@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { and, desc, eq, or } from "drizzle-orm";
+import { put } from "@vercel/blob";
 import { db } from "@/lib/db";
 import { resources } from "@/db/schema";
 import { getSession } from "@/lib/auth";
@@ -24,6 +25,14 @@ async function createResourceFromFormData(formData: FormData, userId: string) {
   if (file instanceof File) {
     const bytes = Buffer.from(await file.arrayBuffer());
 
+    // Store the file in Vercel Blob, not Postgres. Keep small text files
+    // inline too so agents can read them without a fetch.
+    const blob = await put(`uploads/${file.name}`, bytes, {
+      access: "public",
+      addRandomSuffix: true,
+      contentType: file.type || "application/octet-stream",
+    });
+
     const [resource] = await db
       .insert(resources)
       .values({
@@ -39,7 +48,7 @@ async function createResourceFromFormData(formData: FormData, userId: string) {
         extension: file.name.split(".").pop() || null,
         sizeBytes: bytes.byteLength,
         textContent: file.type.startsWith("text/") ? bytes.toString("utf-8") : null,
-        binaryContentBase64: bytes.toString("base64"),
+        blobUrl: blob.url,
         tags,
       })
       .returning();
@@ -145,6 +154,8 @@ export async function POST(request: Request) {
         externalUrl: body.externalUrl || null,
         textContent: body.textContent || null,
         binaryContentBase64: body.binaryContentBase64 || null,
+        // Client-side blob uploads pass the resulting URL here
+        blobUrl: body.blobUrl || null,
         sizeBytes: body.sizeBytes || null,
         tags: body.tags || [],
       })

@@ -136,18 +136,18 @@ export default function Sidebar({
 
         <button
           onClick={onNewChat}
-          className="w-full py-2.5 px-4 rounded-xl text-sm font-medium text-white/80 transition-all hover:bg-white/[0.06]"
-          style={{
-            background: "rgba(255, 255, 255, 0.04)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-          }}
+          className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-[13px] font-medium text-white/80 bg-white/[0.04] border border-white/[0.08] transition-colors hover:bg-white/[0.07] hover:border-white/[0.14] hover:text-white active:scale-[0.99]"
         >
-          + New conversation
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          New conversation
         </button>
       </div>
 
-      {/* Navigation icons */}
-      <div className="px-3 pb-2 flex gap-1">
+      {/* Navigation */}
+      <nav className="px-3 pb-3 space-y-0.5">
         {[
           {
             href: "/chat",
@@ -157,7 +157,7 @@ export default function Sidebar({
           },
           {
             href: "/knowledgebase",
-            label: "Knowledge",
+            label: "Knowledge base",
             match: "/knowledgebase",
             icon: <><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" /><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" /></>,
           },
@@ -189,21 +189,30 @@ export default function Sidebar({
             <Link
               key={nav.href}
               href={nav.href}
-              className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all ${
+              className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors ${
                 active
-                  ? "text-brand-pink bg-brand-pink/[0.08]"
-                  : "text-white/50 hover:text-white/80 hover:bg-white/[0.05]"
+                  ? "text-white bg-white/[0.06]"
+                  : "text-white/45 hover:text-white/80 hover:bg-white/[0.04]"
               }`}
-              title={nav.label}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`shrink-0 ${active ? "text-white/90" : "text-white/35"}`}
+              >
                 {nav.icon}
               </svg>
-              <span className="text-[9px] font-medium tracking-wide uppercase">{nav.label}</span>
+              {nav.label}
             </Link>
           );
         })}
-      </div>
+      </nav>
 
       <div className="mx-3 border-t border-white/[0.06]" />
 
@@ -213,8 +222,8 @@ export default function Sidebar({
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search conversations..."
-            className="w-full rounded-lg bg-white/[0.03] border border-white/[0.06] px-3 py-2 text-[12px] text-white/70 placeholder:text-white/20 focus:outline-none focus:border-white/[0.12]"
+            placeholder="Search conversations"
+            className="w-full rounded-md bg-white/[0.03] border border-white/[0.06] px-3 py-1.5 text-[12px] text-white/70 placeholder:text-white/25 focus:outline-none focus:border-white/[0.14] transition-colors"
           />
         </div>
       )}
@@ -222,11 +231,18 @@ export default function Sidebar({
       {/* Conversations */}
       <div className="flex-1 overflow-y-auto px-2 pt-2">
         {groups.length === 0 ? (
-          <p className="px-3 py-12 text-[13px] text-white/25 text-center">
-            {conversations.length === 0
-              ? "Start your first conversation"
-              : "No results"}
-          </p>
+          <div className="px-3 py-10">
+            {conversations.length === 0 ? (
+              <>
+                <p className="text-[12px] text-white/40">No conversations yet</p>
+                <p className="text-[11px] text-white/20 mt-1 leading-relaxed">
+                  Everything you start with Gratitude is saved here.
+                </p>
+              </>
+            ) : (
+              <p className="text-[12px] text-white/30">No matches for that search</p>
+            )}
+          </div>
         ) : (
           groups.map((group) => (
             <div key={group.label} className="mb-3">

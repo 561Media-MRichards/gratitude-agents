@@ -1,7 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { upload } from "@vercel/blob/client";
 import { toast } from "./Toaster";
+
+// Example categories let the team submit reference material (images, decks,
+// ads) that future work draws from. Stored as tags so no schema change needed.
+type ExampleKind = "example:image" | "example:deck" | "example:ad";
+type ResourceKind = "file" | ExampleKind;
+
+const KIND_OPTIONS: { value: ResourceKind; label: string }[] = [
+  { value: "file", label: "General file" },
+  { value: "example:image", label: "Example - Image" },
+  { value: "example:deck", label: "Example - Deck" },
+  { value: "example:ad", label: "Example - Ad" },
+];
+
+const KIND_LABELS: Record<string, string> = {
+  "example:image": "Image example",
+  "example:deck": "Deck example",
+  "example:ad": "Ad example",
+};
+
+const KIND_ACCEPT: Record<ResourceKind, string> = {
+  file: ".md,.markdown,.txt,.doc,.docx,.pdf,.png,.jpg,.jpeg,.webp,.gif,.svg,.ppt,.pptx,.xls,.xlsx,.csv",
+  "example:image": ".png,.jpg,.jpeg,.webp,.gif,.svg",
+  "example:deck": ".pdf,.ppt,.pptx,.key",
+  "example:ad": ".png,.jpg,.jpeg,.webp,.gif,.mp4,.mov,.pdf",
+};
+
+// Files upload browser -> Vercel Blob directly (not through the serverless
+// function), so the cap is generous. Matches the token route's limit.
+const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
 
 interface ResourceItem {
   id: string;
@@ -31,7 +61,9 @@ export default function ResourcesManager() {
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState<"private" | "internal" | "partner">("internal");
   const [tags, setTags] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [kind, setKind] = useState<ResourceKind>("file");
+  const [kindFilter, setKindFilter] = useState<"all" | ExampleKind>("all");
   const [saving, setSaving] = useState(false);
 
   async function loadResources() {
@@ -59,35 +91,86 @@ export default function ResourcesManager() {
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault();
-    if (!file && !title.trim()) return;
+    if (files.length === 0 && !title.trim()) return;
+
+    // Fold the example category into tags so filtering works with no schema change
+    const tagString = [tags, kind !== "file" ? kind : ""]
+      .filter(Boolean)
+      .join(",");
+
+    const oversized = files.find((f) => f.size > MAX_UPLOAD_BYTES);
+    if (oversized) {
+      toast(`"${oversized.name}" is over the 100MB upload limit.`);
+      return;
+    }
 
     setSaving(true);
 
     try {
-      const formData = new FormData();
-      formData.set("title", title);
-      formData.set("description", description);
-      formData.set("visibility", visibility);
-      formData.set("tags", tags);
+      if (files.length > 0) {
+        let failed = 0;
+        for (const f of files) {
+          try {
+            // Upload straight to Vercel Blob (bypasses the serverless body
+            // limit), then record metadata + blob URL as a resource row
+            const blob = await upload(f.name, f, {
+              access: "public",
+              handleUploadUrl: "/api/blob/upload",
+            });
 
-      if (file) {
-        formData.set("file", file);
-      }
-
-      const res = await fetch("/api/resources", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) {
-        setTitle("");
-        setDescription("");
-        setTags("");
-        setFile(null);
-        await loadResources();
+            const res = await fetch("/api/resources", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                // Multi-file: title applies to a single file, otherwise use filenames
+                title:
+                  files.length === 1
+                    ? title || f.name
+                    : title
+                      ? `${title} - ${f.name}`
+                      : f.name,
+                description,
+                visibility,
+                type: "upload",
+                fileName: f.name,
+                mimeType: f.type || "application/octet-stream",
+                extension: f.name.split(".").pop() || null,
+                sizeBytes: f.size,
+                blobUrl: blob.url,
+                tags: tagString.split(",").map((t) => t.trim()).filter(Boolean),
+              }),
+            });
+            if (!res.ok) throw new Error("metadata save failed");
+          } catch {
+            failed++;
+            toast(`Upload failed for "${f.name}".`);
+          }
+        }
+        if (failed === 0) {
+          toast(
+            files.length === 1
+              ? "File uploaded."
+              : `${files.length} files uploaded.`
+          );
+        }
       } else {
-        toast("Upload failed. Please try again.");
+        const formData = new FormData();
+        formData.set("title", title);
+        formData.set("description", description);
+        formData.set("visibility", visibility);
+        formData.set("tags", tagString);
+
+        const res = await fetch("/api/resources", { method: "POST", body: formData });
+        if (!res.ok) {
+          toast("Upload failed. Please try again.");
+        }
       }
+
+      setTitle("");
+      setDescription("");
+      setTags("");
+      setFiles([]);
+      await loadResources();
     } catch {
       toast("Upload failed. Check your connection and try again.");
     } finally {
@@ -122,7 +205,8 @@ export default function ResourcesManager() {
       || resource.description?.toLowerCase().includes(query.toLowerCase())
       || resource.tags?.some((tag) => tag.toLowerCase().includes(query.toLowerCase()));
     const matchesStatus = statusFilter === "all" || resource.status === statusFilter;
-    return matchesQuery && matchesStatus;
+    const matchesKind = kindFilter === "all" || resource.tags?.includes(kindFilter);
+    return matchesQuery && matchesStatus && matchesKind;
   });
 
   return (
@@ -139,17 +223,29 @@ export default function ResourcesManager() {
             Resource Library
           </h2>
           <p className="text-sm text-white/45">
-            Upload partner documents, keep generated outputs, and make approved files downloadable by the right audience.
+            Upload files and submit examples of images, decks, and ads you want future work to learn from. Pick a kind, add a few tags, and the team can find them here.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Resource title"
             className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
           />
+          <select
+            value={kind}
+            onChange={(e) => setKind(e.target.value as ResourceKind)}
+            className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
+            title="What kind of upload is this?"
+          >
+            {KIND_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
           <select
             value={visibility}
             onChange={(e) => setVisibility(e.target.value as "private" | "internal" | "partner")}
@@ -184,11 +280,18 @@ export default function ResourcesManager() {
           />
           <input
             type="file"
-            accept=".md,.markdown,.txt,.doc,.docx,.pdf"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            multiple
+            accept={KIND_ACCEPT[kind]}
+            onChange={(e) => setFiles(Array.from(e.target.files || []))}
             className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/60"
           />
         </div>
+
+        {files.length > 1 && (
+          <p className="text-[12px] text-white/35">
+            {files.length} files selected. Each uploads as its own resource (100MB max per file).
+          </p>
+        )}
 
         <button
           type="submit"
@@ -198,7 +301,11 @@ export default function ResourcesManager() {
             background: "linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)",
           }}
         >
-          {saving ? "Saving..." : "Add Resource"}
+          {saving
+            ? "Uploading..."
+            : files.length > 1
+              ? `Upload ${files.length} Files`
+              : "Add Resource"}
         </button>
       </form>
 
@@ -217,6 +324,16 @@ export default function ResourcesManager() {
               placeholder="Search files"
               className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
             />
+            <select
+              value={kindFilter}
+              onChange={(e) => setKindFilter(e.target.value as "all" | ExampleKind)}
+              className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
+            >
+              <option value="all">All kinds</option>
+              <option value="example:image">Image examples</option>
+              <option value="example:deck">Deck examples</option>
+              <option value="example:ad">Ad examples</option>
+            </select>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as "all" | "draft" | "published")}
@@ -275,9 +392,13 @@ export default function ResourcesManager() {
               {resource.tags?.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[11px] px-2 py-1 rounded-full border border-white/[0.08] text-white/45"
+                  className={`text-[11px] px-2 py-1 rounded-full border ${
+                    KIND_LABELS[tag]
+                      ? "border-brand-pink/25 text-brand-pink/70 bg-brand-pink/[0.05]"
+                      : "border-white/[0.08] text-white/45"
+                  }`}
                 >
-                  {tag}
+                  {KIND_LABELS[tag] || tag}
                 </span>
               ))}
             </div>
