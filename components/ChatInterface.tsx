@@ -1,9 +1,36 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { upload } from "@vercel/blob/client";
 import ChatMessage from "./ChatMessage";
 import GratitudeMark from "./GratitudeMark";
 import { toast } from "./Toaster";
+
+export interface ChatAttachment {
+  resourceId: string;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+}
+
+const MAX_ATTACHMENTS = 4;
+const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+
+// Markdown appended to the user's message so attachments render in the
+// conversation (images inline, other files as links)
+export function attachmentMarkdown(attachments: ChatAttachment[]): string {
+  if (attachments.length === 0) return "";
+  return (
+    "\n\n" +
+    attachments
+      .map((a) =>
+        a.mimeType.startsWith("image/")
+          ? `![${a.fileName}](/api/resources/${a.resourceId}/download?inline=1)`
+          : `[Attached: ${a.fileName}](/api/resources/${a.resourceId}/download)`
+      )
+      .join("\n")
+  );
+}
 
 function timeOfDayGreeting(): string {
   const h = new Date().getHours();
@@ -268,6 +295,9 @@ export default function ChatInterface({
   const [searching, setSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [generatingImage, setGeneratingImage] = useState(false);
+  const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -324,15 +354,80 @@ export default function ChatInterface({
     el.style.height = Math.min(el.scrollHeight, 200) + "px";
   }
 
+  // Attach files from the composer: upload straight to blob (same client
+  // path as the Files page), record a resource row, and hold the reference
+  // until send. The agent reads images and PDFs directly.
+  async function handleFilesSelected(fileList: FileList | null) {
+    if (!fileList || fileList.length === 0) return;
+    const incoming = Array.from(fileList);
+
+    if (attachments.length + incoming.length > MAX_ATTACHMENTS) {
+      toast(`Up to ${MAX_ATTACHMENTS} attachments per message.`);
+      return;
+    }
+    const oversized = incoming.find((f) => f.size > MAX_ATTACHMENT_BYTES);
+    if (oversized) {
+      toast(`"${oversized.name}" is over the 25MB attachment limit.`);
+      return;
+    }
+
+    setUploadingAttachment(true);
+    try {
+      for (const f of incoming) {
+        const blob = await upload(f.name, f, {
+          access: "public",
+          handleUploadUrl: "/api/blob/upload",
+        });
+        const res = await fetch("/api/resources", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: f.name,
+            type: "upload",
+            visibility: "private",
+            fileName: f.name,
+            mimeType: f.type || "application/octet-stream",
+            extension: f.name.split(".").pop() || null,
+            sizeBytes: f.size,
+            blobUrl: blob.url,
+            tags: ["chat-upload"],
+          }),
+        });
+        if (!res.ok) throw new Error("metadata save failed");
+        const resource = await res.json();
+        setAttachments((prev) => [
+          ...prev,
+          {
+            resourceId: resource.id,
+            fileName: f.name,
+            mimeType: f.type || "application/octet-stream",
+            sizeBytes: f.size,
+          },
+        ]);
+      }
+    } catch (e) {
+      console.error("Attachment upload failed:", e);
+      toast("Attachment upload failed. Please try again.");
+    } finally {
+      setUploadingAttachment(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   async function handleSend(overrideMessage?: string) {
     const trimmed = (overrideMessage || input).trim();
-    if (!trimmed || streaming) return;
+    if ((!trimmed && attachments.length === 0) || streaming || uploadingAttachment) return;
 
+    const sentAttachments = attachments;
+    setAttachments([]);
     setInput("");
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
-    setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
+    const displayContent =
+      (trimmed || "Please review the attached file(s).") +
+      attachmentMarkdown(sentAttachments);
+    setMessages((prev) => [...prev, { role: "user", content: displayContent }]);
     setStreaming(true);
 
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
@@ -342,9 +437,10 @@ export default function ChatInterface({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: trimmed,
+          message: trimmed || "Please review the attached file(s).",
           agentId,
           conversationId,
+          attachments: sentAttachments,
         }),
       });
 
@@ -572,7 +668,57 @@ export default function ChatInterface({
       {/* Input */}
       <div className="shrink-0 border-t border-white/[0.06] bg-dark-900/30">
         <div className="max-w-3xl mx-auto px-6 py-4">
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {attachments.map((a) => (
+                <span
+                  key={a.resourceId}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] text-white/60 bg-white/[0.04] border border-white/[0.08]"
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                  </svg>
+                  {a.fileName.length > 28 ? a.fileName.slice(0, 25) + "..." : a.fileName}
+                  <button
+                    onClick={() =>
+                      setAttachments((prev) => prev.filter((x) => x.resourceId !== a.resourceId))
+                    }
+                    className="text-white/30 hover:text-white/70 transition-colors"
+                    title="Remove attachment"
+                  >
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+              {uploadingAttachment && (
+                <span className="px-2.5 py-1 rounded-lg text-[11px] text-white/35 bg-white/[0.02] border border-white/[0.05]">
+                  Uploading...
+                </span>
+              )}
+            </div>
+          )}
           <div className="flex items-end gap-3 rounded-2xl px-4 py-3 bg-white/[0.03] border border-white/[0.07] transition-colors focus-within:border-white/[0.16] focus-within:bg-white/[0.04]">
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.md,.csv"
+              onChange={(e) => void handleFilesSelected(e.target.files)}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={streaming || uploadingAttachment}
+              className="shrink-0 pb-1 text-white/30 hover:text-white/70 disabled:opacity-30 transition-colors"
+              title="Attach files (images, PDFs, text)"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+              </svg>
+            </button>
             <textarea
               ref={textareaRef}
               value={input}
@@ -593,15 +739,15 @@ export default function ChatInterface({
               </span>
               <button
                 onClick={() => handleSend()}
-                disabled={!input.trim() || streaming}
+                disabled={(!input.trim() && attachments.length === 0) || streaming || uploadingAttachment}
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-white transition-all duration-200 disabled:opacity-20 hover:-translate-y-0.5 active:translate-y-0"
                 style={{
                   background:
-                    input.trim() && !streaming
+                    (input.trim() || attachments.length > 0) && !streaming
                       ? "linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)"
                       : "rgba(255,255,255,0.04)",
                   boxShadow:
-                    input.trim() && !streaming
+                    (input.trim() || attachments.length > 0) && !streaming
                       ? "0 4px 20px rgba(254, 49, 132, 0.25)"
                       : "none",
                 }}

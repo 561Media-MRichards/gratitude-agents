@@ -37,7 +37,43 @@ export async function POST(request: Request) {
       message: string;
       agentId?: string;
       conversationId?: string;
+      attachments?: {
+        resourceId: string;
+        fileName: string;
+        mimeType: string;
+      }[];
     };
+
+    // Validate attachments: only resources the requester actually owns can be
+    // attached (client sends ids, never trust them)
+    let attachments: { resourceId: string; fileName: string; mimeType: string; blobUrl: string | null; textContent: string | null }[] = [];
+    if (Array.isArray(body.attachments) && body.attachments.length > 0) {
+      const ids = body.attachments
+        .slice(0, 4)
+        .map((a: { resourceId: string }) => a.resourceId)
+        .filter((id: string) => /^[0-9a-f-]{36}$/.test(id));
+      if (ids.length > 0) {
+        const rows = await db.execute(sql`
+          SELECT id, file_name, mime_type, blob_url, text_content
+          FROM resources
+          WHERE owner_id = ${session.userId}
+            AND id = ANY(ARRAY[${sql.join(ids.map((id: string) => sql`${id}::uuid`), sql`, `)}])
+        `);
+        attachments = (rows.rows as unknown as {
+          id: string;
+          file_name: string | null;
+          mime_type: string | null;
+          blob_url: string | null;
+          text_content: string | null;
+        }[]).map((r) => ({
+          resourceId: r.id,
+          fileName: r.file_name || "file",
+          mimeType: r.mime_type || "application/octet-stream",
+          blobUrl: r.blob_url,
+          textContent: r.text_content,
+        }));
+      }
+    }
 
     // Accept agentId for backward compat but default to "gratitude"
     const agentId = body.agentId || "gratitude";
@@ -97,11 +133,24 @@ export async function POST(request: Request) {
       }
     }
 
-    // Save user message
+    // Save user message (attachment links appended so history and the UI
+    // render them - images inline, other files as download links)
+    const attachmentNote =
+      attachments.length > 0
+        ? "\n\n" +
+          attachments
+            .map((a) =>
+              a.mimeType.startsWith("image/")
+                ? `![${a.fileName}](/api/resources/${a.resourceId}/download?inline=1)`
+                : `[Attached: ${a.fileName}](/api/resources/${a.resourceId}/download)`
+            )
+            .join("\n")
+        : "";
+
     await db.insert(messages).values({
       conversationId: convId,
       role: "user",
-      content: message,
+      content: message + attachmentNote,
     });
 
     // Load conversation history - most recent messages only, so long
@@ -116,10 +165,52 @@ export async function POST(request: Request) {
         .limit(HISTORY_LIMIT)
     ).reverse();
 
-    const apiMessages = history.map((m) => ({
+    const apiMessages: Anthropic.Messages.MessageParam[] = history.map((m) => ({
       role: m.role as "user" | "assistant",
       content: m.content,
     }));
+
+    // Attachments become native model input for THIS turn: images and PDFs as
+    // URL blocks (the model reads them directly from the blob CDN), small text
+    // files inlined. Earlier turns keep markdown links only.
+    if (attachments.length > 0 && apiMessages.length > 0) {
+      const last = apiMessages[apiMessages.length - 1];
+      const blocks: Anthropic.Messages.ContentBlockParam[] = [
+        { type: "text", text: typeof last.content === "string" ? last.content : message },
+      ];
+      for (const a of attachments) {
+        if (a.mimeType.startsWith("image/") && a.blobUrl) {
+          blocks.push({ type: "image", source: { type: "url", url: a.blobUrl } });
+        } else if (a.mimeType === "application/pdf" && a.blobUrl) {
+          blocks.push({ type: "document", source: { type: "url", url: a.blobUrl } });
+        } else if (
+          a.mimeType.startsWith("text/") ||
+          /\.(md|csv|txt)$/i.test(a.fileName)
+        ) {
+          let text = a.textContent;
+          if (!text && a.blobUrl) {
+            try {
+              const r = await fetch(a.blobUrl);
+              if (r.ok) text = await r.text();
+            } catch {
+              // fall through to the unreadable note below
+            }
+          }
+          blocks.push({
+            type: "text",
+            text: text
+              ? `\n\n[Contents of attached file "${a.fileName}"]:\n${text.slice(0, 50000)}`
+              : `\n\n[The user attached "${a.fileName}" but its contents could not be read.]`,
+          });
+        } else {
+          blocks.push({
+            type: "text",
+            text: `\n\n[The user attached "${a.fileName}" (${a.mimeType}). This file type cannot be read directly yet - acknowledge the attachment and work from the user's description of it.]`,
+          });
+        }
+      }
+      last.content = blocks;
+    }
 
     // For the unified agent, detect which specialist domain applies
     // and inject that specialist's knowledge into the prompt
@@ -128,7 +219,11 @@ export async function POST(request: Request) {
     let brandContextAgentId = agentId;
 
     if (agentId === "gratitude") {
-      detectedDomain = detectSpecialistDomain(apiMessages);
+      // Domain detection reads plain text - use the DB history (attachment
+      // blocks in apiMessages are for the model only)
+      detectedDomain = detectSpecialistDomain(
+        history.map((m) => ({ role: m.role, content: m.content }))
+      );
       if (detectedDomain) {
         const specialist = getAgent(detectedDomain);
         if (specialist) {
