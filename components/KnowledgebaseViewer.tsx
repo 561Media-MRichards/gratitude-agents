@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface KBEntry {
   id: string;
@@ -81,6 +82,7 @@ interface SessionResponse {
 export default function KnowledgebaseViewer() {
   const [entries, setEntries] = useState<KBEntry[]>([]);
   const [session, setSession] = useState<SessionResponse | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [filter, setFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "review" | "approved">("all");
   const [search, setSearch] = useState("");
@@ -126,8 +128,16 @@ export default function KnowledgebaseViewer() {
     return true;
   });
 
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this entry?")) return;
+  // Non-blocking two-step delete - native confirm() freezes the main thread
+  // and violates INP
+  function handleDelete(id: string) {
+    setConfirmDeleteId(id);
+  }
+
+  async function confirmDelete() {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
+    if (!id) return;
     await fetch(`/api/knowledgebase/${id}`, { method: "DELETE" });
     setEntries((prev) => prev.filter((e) => e.id !== id));
   }
@@ -564,6 +574,13 @@ export default function KnowledgebaseViewer() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDeleteId !== null}
+        title="Delete this entry?"
+        onCancel={() => setConfirmDeleteId(null)}
+        onConfirm={() => void confirmDelete()}
+      />
     </div>
   );
 }

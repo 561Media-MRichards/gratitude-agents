@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { toast } from "./Toaster";
+import ConfirmDialog from "./ConfirmDialog";
 
 // Example categories let the team submit reference material (images, decks,
 // ads) that future work draws from. Stored as tags so no schema change needed.
@@ -64,6 +65,7 @@ export default function ResourcesManager() {
   const [files, setFiles] = useState<File[]>([]);
   const [kind, setKind] = useState<ResourceKind>("file");
   const [kindFilter, setKindFilter] = useState<"all" | ExampleKind>("all");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   async function loadResources() {
@@ -190,9 +192,16 @@ export default function ResourcesManager() {
     await loadResources();
   }
 
-  async function handleDelete(id: string) {
-    // Deletion is permanent - match the confirm pattern conversations already use
-    if (!window.confirm("Delete this file? This can't be undone.")) return;
+  // Two-step delete via non-blocking dialog. window.confirm() froze the main
+  // thread for the dialog's lifetime and was flagged as a 1.3s INP violation.
+  function handleDelete(id: string) {
+    setConfirmDeleteId(id);
+  }
+
+  async function confirmDelete() {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
+    if (!id) return;
     const res = await fetch(`/api/resources/${id}`, { method: "DELETE" });
     if (!res.ok) toast("Delete failed. Please try again.");
     await loadResources();
@@ -429,6 +438,13 @@ export default function ResourcesManager() {
         ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDeleteId !== null}
+        title="Delete this file?"
+        onCancel={() => setConfirmDeleteId(null)}
+        onConfirm={() => void confirmDelete()}
+      />
     </div>
   );
 }
