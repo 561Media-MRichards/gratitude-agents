@@ -106,7 +106,8 @@ export async function generateImage(options: {
   // whole generation.
   if (options.includeLogo !== false) {
     try {
-      bytes = await compositeBrandLogo(bytes);
+      // Buffer.from normalizes sharp's Buffer<ArrayBufferLike> generic
+      bytes = Buffer.from(await compositeBrandLogo(bytes));
       mimeType = "image/png"; // compositor always outputs PNG
     } catch (e) {
       console.error("Logo compositing failed, delivering un-stamped image:", e);
