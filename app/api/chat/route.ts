@@ -8,7 +8,7 @@ import { getBrandContext } from "@/lib/brand-context";
 import { enrichConversation } from "@/lib/enrich";
 import { getSession } from "@/lib/auth";
 import {
-  canAccessConversation,
+  canWriteConversation,
   defaultVisibilityForRole,
   isPrivilegedUser,
 } from "@/lib/permissions";
@@ -82,7 +82,9 @@ export async function POST(request: Request) {
         });
       }
 
-      if (!canAccessConversation(session, conv)) {
+      // Write check: appending a message mutates the conversation, so this is
+      // stricter than the view permission used elsewhere
+      if (!canWriteConversation(session, conv)) {
         return new Response(JSON.stringify({ error: "Forbidden" }), {
           status: 403,
           headers: { "Content-Type": "application/json" },
@@ -97,12 +99,17 @@ export async function POST(request: Request) {
       content: message,
     });
 
-    // Load conversation history
-    const history = await db
-      .select()
-      .from(messages)
-      .where(eq(messages.conversationId, convId))
-      .orderBy(messages.createdAt);
+    // Load conversation history - most recent messages only, so long
+    // conversations don't grow the context (and the bill) without bound
+    const HISTORY_LIMIT = 40;
+    const history = (
+      await db
+        .select()
+        .from(messages)
+        .where(eq(messages.conversationId, convId))
+        .orderBy(desc(messages.createdAt))
+        .limit(HISTORY_LIMIT)
+    ).reverse();
 
     const apiMessages = history.map((m) => ({
       role: m.role as "user" | "assistant",
@@ -136,11 +143,15 @@ export async function POST(request: Request) {
 
     // Get KB entries - for unified agent, fetch across all domains
     let kbEntries;
+    // Only approved entries reach privileged prompts - enrichment output is
+    // draft until a human reviews it (prevents junk/injected learnings from
+    // flowing straight into everyone's context)
     if (agentId === "gratitude") {
       kbEntries = isPrivilegedUser(session)
         ? await db
             .select()
             .from(knowledgebaseEntries)
+            .where(eq(knowledgebaseEntries.status, "approved"))
             .orderBy(desc(knowledgebaseEntries.createdAt))
             .limit(20)
         : await db
@@ -163,7 +174,12 @@ export async function POST(request: Request) {
         ? await db
             .select()
             .from(knowledgebaseEntries)
-            .where(eq(knowledgebaseEntries.agentId, agentId))
+            .where(
+              and(
+                eq(knowledgebaseEntries.agentId, agentId),
+                eq(knowledgebaseEntries.status, "approved")
+              )
+            )
             .orderBy(desc(knowledgebaseEntries.createdAt))
             .limit(20)
         : await db

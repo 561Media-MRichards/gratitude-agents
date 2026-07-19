@@ -88,6 +88,14 @@ export function getBrandContext(agentId: string): string {
     sections.push("## Brand Memory\n" + brandMemory);
   }
 
+  // Messaging constraints - the "what to never say" guardrails. Loaded for EVERY
+  // agent unconditionally. (Previously declared only in _retrieval-rules.yaml's
+  // load_if_relevant tier, which was never implemented, so no agent ever saw them.)
+  const constraints = loadBrandFile("constraints-messaging.yaml");
+  if (constraints) {
+    sections.push("## Messaging Constraints (never violate these)\n" + constraints);
+  }
+
   // Visual system for all design agents + any profile that uses it
   const isDesign = !!config.design;
   if (isDesign) {

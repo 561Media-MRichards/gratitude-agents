@@ -76,9 +76,28 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Each user only sees their own files
+  // Each user only sees their own files.
+  // Project columns explicitly: binaryContentBase64/textContent can be many MB
+  // per row - listing must never haul file bodies out of the database.
   const rows = await db
-    .select()
+    .select({
+      id: resources.id,
+      ownerId: resources.ownerId,
+      conversationId: resources.conversationId,
+      title: resources.title,
+      description: resources.description,
+      type: resources.type,
+      status: resources.status,
+      visibility: resources.visibility,
+      fileName: resources.fileName,
+      mimeType: resources.mimeType,
+      extension: resources.extension,
+      sizeBytes: resources.sizeBytes,
+      externalUrl: resources.externalUrl,
+      tags: resources.tags,
+      createdAt: resources.createdAt,
+      updatedAt: resources.updatedAt,
+    })
     .from(resources)
     .where(eq(resources.ownerId, session.userId))
     .orderBy(desc(resources.updatedAt))

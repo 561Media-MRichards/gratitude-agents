@@ -57,7 +57,12 @@ export async function enrichConversation(
     });
 
     const text = response.content[0].type === "text" ? response.content[0].text : "";
-    const learnings = JSON.parse(text);
+    // Models sometimes wrap JSON in markdown fences despite instructions - strip them
+    const cleaned = text
+      .replace(/^\s*```(?:json)?\s*/i, "")
+      .replace(/\s*```\s*$/, "")
+      .trim();
+    const learnings = JSON.parse(cleaned);
 
     if (!Array.isArray(learnings) || learnings.length === 0) {
       await db
@@ -67,17 +72,31 @@ export async function enrichConversation(
       return;
     }
 
+    const VALID_CATEGORIES = [
+      "campaign_result",
+      "sponsor_info",
+      "content_insight",
+      "strategy_learning",
+      "design_pattern",
+      "general",
+    ];
+
     for (const learning of learnings) {
       await db.insert(knowledgebaseEntries).values({
         conversationId,
         ownerId: options.ownerId,
         agentId,
-        category: learning.category,
-        status: options.role === "partner" ? "draft" : "approved",
+        // Guard against out-of-enum categories from the model (pg enum insert would throw)
+        category: VALID_CATEGORIES.includes(learning.category)
+          ? learning.category
+          : "general",
+        // All enriched entries start as drafts - a human approves before they
+        // enter anyone else's context (no auto-approved model output in prompts)
+        status: "draft",
         visibility: options.role === "partner" ? "private" : "internal",
-        title: learning.title,
-        content: learning.content,
-        tags: learning.tags || [],
+        title: String(learning.title || "").slice(0, 200) || "Untitled learning",
+        content: String(learning.content || ""),
+        tags: Array.isArray(learning.tags) ? learning.tags : [],
         sourceType: "conversation_enrichment",
       });
     }
@@ -88,5 +107,15 @@ export async function enrichConversation(
       .where(eq(conversations.id, conversationId));
   } catch (e) {
     console.error("Enrichment failed:", e);
+    // Mark enriched even on failure - otherwise every subsequent message in this
+    // conversation re-fires a failing (paid) model call forever
+    try {
+      await db
+        .update(conversations)
+        .set({ enriched: true })
+        .where(eq(conversations.id, conversationId));
+    } catch (markErr) {
+      console.error("Failed to mark conversation enriched:", markErr);
+    }
   }
 }

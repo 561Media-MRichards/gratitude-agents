@@ -25,6 +25,14 @@ export function canAccessConversation(user: SessionUser, conversation: Conversat
   return conversation.visibility === "partner";
 }
 
+// Appending messages is a write - only the owner (or an admin) may continue a
+// conversation. canAccessConversation is a VIEW check and must not gate writes:
+// it returns true for any privileged user on any conversation, and for any
+// partner on any partner-visible conversation.
+export function canWriteConversation(user: SessionUser, conversation: Conversation) {
+  return user.role === "admin" || conversation.ownerId === user.userId;
+}
+
 export function canDeleteConversation(user: SessionUser, conversation: Conversation) {
   return user.role === "admin" || conversation.ownerId === user.userId;
 }
