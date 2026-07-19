@@ -227,7 +227,7 @@ export async function POST(request: Request) {
       "\n\n## Web Search\nYou have access to web search. Use it when the user asks about current events, recent data, live information, competitor research, industry stats, or anything that benefits from up-to-date information. Do not tell the user you are searching - just do it and incorporate the results naturally. When you cite information from search results, mention the source naturally in your response (e.g., 'According to Forbes...' or 'A recent report from Nonprofit Quarterly found...').";
 
     const imageGenNote =
-      "\n\n## Image Generation\nYou can generate real images with the generate_image tool. Use it when the user asks for a graphic, social media visual, hero image, background art, illustration, or any other image. Write a detailed, art-directed prompt that follows the Gratitude visual system (dark backgrounds, pink #FE3184 to orange #ec7211 gradient glow accents, premium and modern - never navy). Pick the aspect ratio that fits the use: 1:1 for Instagram posts, 16:9 for banners/YouTube/presentations, 9:16 for stories/reels, 4:3 or 3:4 for general use. After the tool returns, embed the image in your reply using the exact markdown the tool result gives you, then briefly describe what you created. If the user wants changes, call the tool again with a revised prompt. Note: image models cannot render text reliably - avoid asking for words inside the image; recommend text overlays be added in design tools instead.";
+      "\n\n## Image Generation\nYou can generate real images with the generate_image tool. Use it when the user asks for a graphic, social media visual, hero image, background art, illustration, or any other image. Write a detailed, art-directed prompt that follows the Gratitude visual system (dark backgrounds, pink #FE3184 to orange #ec7211 gradient glow accents, premium and modern - never navy). Pick the aspect ratio that fits the use: 1:1 for Instagram posts, 16:9 for banners/YouTube/presentations, 9:16 for stories/reels, 4:3 or 3:4 for general use.\n\nThe OFFICIAL white Gratitude wordmark is composited onto every generated image automatically (bottom-right, brand-standard margin) - this is the real logo file, not AI-rendered. So: never say you cannot place the logo, never design a 'reserved space' for manual compositing, and never ask the user to drop the logo in themselves. Do keep the bottom-right area of your prompt's composition uncluttered so the mark sits cleanly. If the user explicitly wants no logo, pass include_logo: false.\n\nAfter the tool returns, embed the image in your reply using the exact markdown the tool result gives you, then briefly describe what you created. If the user wants changes, call the tool again with a revised prompt. Note: the image model cannot render TEXT reliably - avoid headlines/words inside the generated image itself; offer text overlays as a design-tool step instead.";
 
     const systemPrompt = `${brandContext}${kbSection}\n\n---\n\n${agent.body}${specialistBody}${endUserBehaviorNote}${conciergeNote}${presentationNote}${webSearchNote}${imageGenNote}`;
 
@@ -258,6 +258,11 @@ export async function POST(request: Request) {
               type: "string",
               enum: ["1:1", "16:9", "9:16", "4:3", "3:4"],
               description: "Aspect ratio for the intended placement",
+            },
+            include_logo: {
+              type: "boolean",
+              description:
+                "Whether to stamp the official white Gratitude wordmark bottom-right per brand standard. Defaults to true. Set false only when the user explicitly asks for no logo.",
             },
           },
           required: ["prompt"],
@@ -352,7 +357,11 @@ export async function POST(request: Request) {
 
             for (const toolUse of toolUses) {
               if (toolUse.name === "generate_image") {
-                const input = toolUse.input as { prompt?: string; aspect_ratio?: string };
+                const input = toolUse.input as {
+                  prompt?: string;
+                  aspect_ratio?: string;
+                  include_logo?: boolean;
+                };
                 const validRatios = ["1:1", "16:9", "9:16", "4:3", "3:4"];
                 send({ generatingImage: true });
                 try {
@@ -363,6 +372,7 @@ export async function POST(request: Request) {
                       : "1:1",
                     ownerId: session.userId,
                     conversationId: convId,
+                    includeLogo: input.include_logo !== false,
                   });
                   toolResults.push({
                     type: "tool_result",

@@ -1,6 +1,40 @@
 import { put } from "@vercel/blob";
 import { db } from "@/lib/db";
 import { resources } from "@/db/schema";
+import { GRATITUDE_LOGO_WHITE_SVG } from "@/lib/brand-logo";
+
+// Composite the real Gratitude wordmark onto a generated image, following the
+// brand standard in design-kit/platform-specs.yaml: bottom-right, 40px margin,
+// 120px max width (scaled proportionally to canvas size), white on dark.
+// This is what lets the image tool deliver FINISHED graphics instead of
+// backgrounds with a "reserved space" for manual compositing.
+async function compositeBrandLogo(bytes: Buffer): Promise<Buffer> {
+  const sharp = (await import("sharp")).default;
+  const meta = await sharp(bytes).metadata();
+  const W = meta.width || 1024;
+  const H = meta.height || 1024;
+
+  // Scale the 1080-reference spec (40px margin, 120px logo) to this canvas
+  const margin = Math.max(24, Math.round((W * 40) / 1080));
+  const logoW = Math.max(96, Math.round((W * 120) / 1080));
+  const logoH = Math.round(logoW * (287.89 / 1449)); // wordmark aspect ratio
+
+  const logo = await sharp(Buffer.from(GRATITUDE_LOGO_WHITE_SVG), { density: 300 })
+    .resize({ width: logoW })
+    .png()
+    .toBuffer();
+
+  return sharp(bytes)
+    .composite([
+      {
+        input: logo,
+        left: W - logoW - margin,
+        top: H - logoH - margin,
+      },
+    ])
+    .png()
+    .toBuffer();
+}
 
 // Gemini Imagen image generation for the design agents.
 // The PNG is stored in Vercel Blob; a `resources` row records metadata so chat
@@ -22,6 +56,7 @@ export async function generateImage(options: {
   ownerId: string;
   conversationId?: string | null;
   title?: string;
+  includeLogo?: boolean;
 }): Promise<GeneratedImage> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -62,11 +97,24 @@ export async function generateImage(options: {
 
   const title =
     options.title || options.prompt.slice(0, 80).trim() || "Generated image";
-  const mimeType = prediction.mimeType || "image/png";
+  let mimeType = prediction.mimeType || "image/png";
+
+  let bytes = Buffer.from(prediction.bytesBase64Encoded, "base64");
+
+  // Stamp the real brand wordmark unless explicitly opted out. If compositing
+  // fails for any reason, ship the un-stamped image rather than failing the
+  // whole generation.
+  if (options.includeLogo !== false) {
+    try {
+      bytes = await compositeBrandLogo(bytes);
+      mimeType = "image/png"; // compositor always outputs PNG
+    } catch (e) {
+      console.error("Logo compositing failed, delivering un-stamped image:", e);
+    }
+  }
+
   const extension = mimeType.includes("jpeg") ? "jpg" : "png";
   const fileName = `${title.replace(/[^\w\- ]/g, "").replace(/\s+/g, "-").toLowerCase() || "image"}.${extension}`;
-
-  const bytes = Buffer.from(prediction.bytesBase64Encoded, "base64");
   const blob = await put(`generated/${fileName}`, bytes, {
     access: "public",
     addRandomSuffix: true,
