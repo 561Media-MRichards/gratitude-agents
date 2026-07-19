@@ -213,17 +213,12 @@ export default function ResourcesManager() {
     <div className="space-y-8">
       <form
         onSubmit={handleUpload}
-        className="rounded-2xl border border-white/[0.08] p-6 space-y-4"
-        style={{
-          background: "linear-gradient(180deg, rgba(26,26,26,0.95) 0%, rgba(13,13,13,0.95) 100%)",
-        }}
+        className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 space-y-4"
       >
         <div>
-          <h2 className="font-display text-2xl uppercase text-gradient mb-2">
-            Resource Library
-          </h2>
-          <p className="text-sm text-white/45">
-            Upload files and submit examples of images, decks, and ads you want future work to learn from. Pick a kind, add a few tags, and the team can find them here.
+          <h2 className="text-[14px] font-medium text-white/85 mb-1">Add a file</h2>
+          <p className="text-[13px] text-white/40 leading-relaxed">
+            Upload files or examples of images, decks, and ads you want future work to learn from. Pick a kind, add a few tags, and the team can find them here.
           </p>
         </div>
 
@@ -232,12 +227,12 @@ export default function ResourcesManager() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Resource title"
-            className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
+            className="px-3.5 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[13px] text-white/80 placeholder:text-white/25 focus:outline-none focus:border-white/[0.14] transition-colors"
           />
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value as ResourceKind)}
-            className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
+            className="px-3.5 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[13px] text-white/80 placeholder:text-white/25 focus:outline-none focus:border-white/[0.14] transition-colors"
             title="What kind of upload is this?"
           >
             {KIND_OPTIONS.map((o) => (
@@ -249,7 +244,7 @@ export default function ResourcesManager() {
           <select
             value={visibility}
             onChange={(e) => setVisibility(e.target.value as "private" | "internal" | "partner")}
-            className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
+            className="px-3.5 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[13px] text-white/80 placeholder:text-white/25 focus:outline-none focus:border-white/[0.14] transition-colors"
           >
             {/* Partners can only upload private files (server enforces this) -
                 don't show options that would silently be overridden */}
@@ -268,7 +263,7 @@ export default function ResourcesManager() {
           onChange={(e) => setDescription(e.target.value)}
           placeholder="What is this file for?"
           rows={3}
-          className="w-full px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
+          className="w-full px-3.5 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[13px] text-white/80 placeholder:text-white/25 focus:outline-none focus:border-white/[0.14] transition-colors"
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -276,14 +271,14 @@ export default function ResourcesManager() {
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             placeholder="proposal, sponsor, deck"
-            className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
+            className="px-3.5 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[13px] text-white/80 placeholder:text-white/25 focus:outline-none focus:border-white/[0.14] transition-colors"
           />
           <input
             type="file"
             multiple
             accept={KIND_ACCEPT[kind]}
             onChange={(e) => setFiles(Array.from(e.target.files || []))}
-            className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/60"
+            className="px-3.5 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[13px] text-white/50 file:mr-3 file:rounded-md file:border-0 file:bg-white/[0.06] file:px-2.5 file:py-1 file:text-[12px] file:text-white/70 focus:outline-none focus:border-white/[0.14] transition-colors"
           />
         </div>
 
@@ -296,9 +291,10 @@ export default function ResourcesManager() {
         <button
           type="submit"
           disabled={saving}
-          className="px-5 py-3 rounded-full text-sm font-semibold text-white"
+          className="px-5 py-2.5 rounded-full text-[13px] font-semibold text-white transition-all duration-200 disabled:opacity-40 hover:-translate-y-0.5 active:translate-y-0"
           style={{
             background: "linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)",
+            boxShadow: "0 4px 20px rgba(254, 49, 132, 0.2)",
           }}
         >
           {saving
@@ -309,11 +305,11 @@ export default function ResourcesManager() {
         </button>
       </form>
 
-      <div className="rounded-2xl border border-white/[0.08] p-5 bg-white/[0.03]">
+      <div className="rounded-xl border border-white/[0.06] p-5 bg-white/[0.02]">
         <div className="flex flex-col lg:flex-row lg:items-center gap-3 justify-between">
           <div>
-            <h3 className="text-lg text-white/90 font-semibold">Browse saved files</h3>
-            <p className="text-sm text-white/40 mt-1">
+            <h3 className="text-[14px] font-medium text-white/85">Browse saved files</h3>
+            <p className="text-[13px] text-white/40 mt-1">
               Search by title, description, or tags. Publish only the files that should be visible beyond the creator.
             </p>
           </div>
@@ -322,12 +318,12 @@ export default function ResourcesManager() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search files"
-              className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
+              className="px-3.5 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[13px] text-white/80 placeholder:text-white/25 focus:outline-none focus:border-white/[0.14] transition-colors"
             />
             <select
               value={kindFilter}
               onChange={(e) => setKindFilter(e.target.value as "all" | ExampleKind)}
-              className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
+              className="px-3.5 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[13px] text-white/80 placeholder:text-white/25 focus:outline-none focus:border-white/[0.14] transition-colors"
             >
               <option value="all">All kinds</option>
               <option value="example:image">Image examples</option>
@@ -337,7 +333,7 @@ export default function ResourcesManager() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as "all" | "draft" | "published")}
-              className="px-4 py-3 rounded-xl bg-dark-800 border border-white/[0.08] text-white/80"
+              className="px-3.5 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[13px] text-white/80 placeholder:text-white/25 focus:outline-none focus:border-white/[0.14] transition-colors"
             >
               <option value="all">All statuses</option>
               <option value="draft">Draft</option>
@@ -348,9 +344,9 @@ export default function ResourcesManager() {
       </div>
 
       {filteredResources.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/[0.1] p-10 text-center bg-white/[0.02]">
-          <h3 className="text-lg font-semibold text-white/80 mb-2">No resources to show</h3>
-          <p className="text-sm text-white/40 max-w-xl mx-auto leading-relaxed">
+        <div className="rounded-xl border border-dashed border-white/[0.1] p-10 text-center bg-white/[0.01]">
+          <h3 className="text-[14px] font-medium text-white/75 mb-1.5">No files to show</h3>
+          <p className="text-[13px] text-white/35 max-w-xl mx-auto leading-relaxed">
             Upload a file, save an agent output from chat, or widen your filters to see more documents in the shared library.
           </p>
         </div>
@@ -359,43 +355,48 @@ export default function ResourcesManager() {
         {filteredResources.map((resource) => (
           <div
             key={resource.id}
-            className="rounded-2xl border border-white/[0.08] p-5 bg-white/[0.03]"
+            className="rounded-xl border border-white/[0.06] p-5 bg-white/[0.02] transition-colors hover:border-white/[0.1]"
           >
             <div className="flex items-start justify-between gap-3 mb-3">
-              <div>
-                <h3 className="text-lg font-semibold text-white/90">{resource.title}</h3>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <span className="text-[10px] uppercase tracking-[0.16em] text-white/30 border border-white/[0.08] rounded-full px-2 py-1">
+              <div className="min-w-0">
+                <h3 className="text-[14px] font-medium text-white/90">{resource.title}</h3>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  <span className="text-[10px] uppercase tracking-wider text-white/30 border border-white/[0.06] rounded-md px-1.5 py-0.5">
                     {resource.type}
                   </span>
-                  <span className="text-[10px] uppercase tracking-[0.16em] text-white/30 border border-white/[0.08] rounded-full px-2 py-1">
+                  <span className="text-[10px] uppercase tracking-wider text-white/30 border border-white/[0.06] rounded-md px-1.5 py-0.5">
                     {resource.status}
                   </span>
-                  <span className="text-[10px] uppercase tracking-[0.16em] text-white/30 border border-white/[0.08] rounded-full px-2 py-1">
+                  <span className="text-[10px] uppercase tracking-wider text-white/30 border border-white/[0.06] rounded-md px-1.5 py-0.5">
                     {resource.visibility}
                   </span>
                 </div>
               </div>
               <a
                 href={`/api/resources/${resource.id}/download`}
-                className="text-sm text-brand-pink hover:text-white"
+                className="flex items-center gap-1.5 shrink-0 text-[12px] text-white/45 hover:text-white transition-colors"
               >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
                 Download
               </a>
             </div>
 
             {resource.description && (
-              <p className="text-sm text-white/45 leading-relaxed mb-4">{resource.description}</p>
+              <p className="text-[13px] text-white/45 leading-relaxed mb-4">{resource.description}</p>
             )}
 
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-1.5 mb-4">
               {resource.tags?.map((tag) => (
                 <span
                   key={tag}
-                  className={`text-[11px] px-2 py-1 rounded-full border ${
+                  className={`text-[11px] px-2 py-0.5 rounded-md border ${
                     KIND_LABELS[tag]
-                      ? "border-brand-pink/25 text-brand-pink/70 bg-brand-pink/[0.05]"
-                      : "border-white/[0.08] text-white/45"
+                      ? "border-brand-pink/20 text-brand-pink/70 bg-brand-pink/[0.05]"
+                      : "border-white/[0.06] text-white/40"
                   }`}
                 >
                   {KIND_LABELS[tag] || tag}
@@ -404,22 +405,22 @@ export default function ResourcesManager() {
             </div>
 
             <div className="flex items-center justify-between text-[12px] text-white/30">
-              <span>{resource.fileName || resource.mimeType || "Stored output"}</span>
-              <span>{new Date(resource.updatedAt).toLocaleDateString()}</span>
+              <span className="truncate">{resource.fileName || resource.mimeType || "Stored output"}</span>
+              <span className="shrink-0 ml-3">{new Date(resource.updatedAt).toLocaleDateString()}</span>
             </div>
 
             <div className="flex gap-2 mt-4">
               {canPublish && resource.status !== "published" && (
                 <button
                   onClick={() => void handlePublish(resource)}
-                  className="px-3 py-2 rounded-lg text-[12px] border border-brand-pink/30 text-brand-pink"
+                  className="px-3 py-1.5 rounded-lg text-[12px] font-medium border border-brand-pink/25 text-brand-pink/80 hover:bg-brand-pink/[0.06] hover:text-brand-pink transition-colors"
                 >
                   Publish
                 </button>
               )}
               <button
                 onClick={() => void handleDelete(resource.id)}
-                className="px-3 py-2 rounded-lg text-[12px] border border-white/[0.08] text-white/45"
+                className="px-3 py-1.5 rounded-lg text-[12px] border border-white/[0.06] text-white/40 hover:text-red-400 hover:border-red-400/20 hover:bg-red-400/[0.05] transition-colors"
               >
                 Delete
               </button>

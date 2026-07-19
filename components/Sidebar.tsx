@@ -14,10 +14,13 @@ interface Conversation {
 }
 
 interface SidebarProps {
-  conversationId: string | null;
-  onSelectConversation: (id: string) => void;
-  onNewChat: () => void;
-  onDeleteConversation: (id: string) => void;
+  conversationId?: string | null;
+  onSelectConversation?: (id: string) => void;
+  onNewChat?: () => void;
+  onDeleteConversation?: (id: string) => void;
+  /** When false (non-chat pages), the conversation list is hidden and the
+      "New conversation" button links to /chat. Chat behavior is unchanged. */
+  showConversations?: boolean;
 }
 
 interface SessionResponse {
@@ -28,10 +31,11 @@ interface SessionResponse {
 }
 
 export default function Sidebar({
-  conversationId,
+  conversationId = null,
   onSelectConversation,
   onNewChat,
   onDeleteConversation,
+  showConversations = true,
 }: SidebarProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [session, setSession] = useState<SessionResponse | null>(null);
@@ -58,12 +62,12 @@ export default function Sidebar({
     fetch("/api/session").then(async (res) => {
       if (res.ok) setSession(await res.json());
     });
-    void loadConversations();
+    if (showConversations) void loadConversations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (conversationId) {
+    if (showConversations && conversationId) {
       void loadConversations();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -105,7 +109,7 @@ export default function Sidebar({
   function confirmDelete() {
     if (!confirmDeleteId) return;
     setConversations((prev) => prev.filter((c) => c.id !== confirmDeleteId));
-    onDeleteConversation(confirmDeleteId);
+    onDeleteConversation?.(confirmDeleteId);
     setConfirmDeleteId(null);
   }
 
@@ -134,16 +138,29 @@ export default function Sidebar({
           )}
         </div>
 
-        <button
-          onClick={onNewChat}
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-[13px] font-medium text-white/80 bg-white/[0.04] border border-white/[0.08] transition-colors hover:bg-white/[0.07] hover:border-white/[0.14] hover:text-white active:scale-[0.99]"
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14" />
-            <path d="M5 12h14" />
-          </svg>
-          New conversation
-        </button>
+        {onNewChat ? (
+          <button
+            onClick={onNewChat}
+            className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-[13px] font-medium text-white/80 bg-white/[0.04] border border-white/[0.08] transition-colors hover:bg-white/[0.07] hover:border-white/[0.14] hover:text-white active:scale-[0.99]"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
+            New conversation
+          </button>
+        ) : (
+          <Link
+            href="/chat"
+            className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-[13px] font-medium text-white/80 bg-white/[0.04] border border-white/[0.08] transition-colors hover:bg-white/[0.07] hover:border-white/[0.14] hover:text-white active:scale-[0.99]"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
+            New conversation
+          </Link>
+        )}
       </div>
 
       {/* Navigation */}
@@ -217,7 +234,7 @@ export default function Sidebar({
       <div className="mx-3 border-t border-white/[0.06]" />
 
       {/* Search */}
-      {conversations.length > 5 && (
+      {showConversations && conversations.length > 5 && (
         <div className="px-3 pt-3 pb-1">
           <input
             value={search}
@@ -229,6 +246,9 @@ export default function Sidebar({
       )}
 
       {/* Conversations */}
+      {!showConversations ? (
+        <div className="flex-1" />
+      ) : (
       <div className="flex-1 overflow-y-auto px-2 pt-2">
         {groups.length === 0 ? (
           <div className="px-3 py-10">
@@ -252,7 +272,7 @@ export default function Sidebar({
               {group.items.map((conv) => (
                 <div key={conv.id} className="group/conv relative">
                   <button
-                    onClick={() => onSelectConversation(conv.id)}
+                    onClick={() => onSelectConversation?.(conv.id)}
                     className={`w-full text-left px-3 py-2 pr-8 rounded-lg text-[13px] transition-all ${
                       conversationId === conv.id
                         ? "bg-white/[0.08] text-white/90"
@@ -280,6 +300,7 @@ export default function Sidebar({
           ))
         )}
       </div>
+      )}
 
       {/* Footer */}
       <div className="p-3 border-t border-white/[0.06]">

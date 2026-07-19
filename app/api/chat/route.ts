@@ -15,8 +15,10 @@ import {
 import { detectSpecialistDomain } from "@/lib/detect-domain";
 import { generateImage, type ImageAspectRatio } from "@/lib/image-gen";
 
-// Image generation adds ~15s per image on top of model turns
-export const maxDuration = 120;
+// Image generation adds ~15s per image on top of model turns. Keep within
+// the plan's function limit (60s) - raise only after moving to a plan tier
+// that allows longer durations.
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
@@ -280,7 +282,7 @@ export async function POST(request: Request) {
 
           for (let turn = 0; turn < MAX_TOOL_TURNS; turn++) {
             const stream = anthropic.messages.stream({
-              model: "claude-sonnet-4-20250514",
+              model: process.env.CHAT_MODEL || "claude-sonnet-5",
               max_tokens: 8192,
               system: systemPrompt,
               messages: loopMessages,
@@ -369,12 +371,17 @@ export async function POST(request: Request) {
                   });
                 } catch (imageErr) {
                   console.error("Image generation failed:", imageErr);
+                  const reason =
+                    imageErr instanceof Error ? imageErr.message.slice(0, 300) : "unknown error";
+                  // Surface the reason in the SSE stream for diagnostics
+                  // (client ignores unknown keys) and give the model enough
+                  // detail to react appropriately (e.g. safety block vs outage)
+                  send({ imageError: reason });
                   toolResults.push({
                     type: "tool_result",
                     tool_use_id: toolUse.id,
                     is_error: true,
-                    content:
-                      "Image generation failed. Briefly let the user know the image could not be created right now and continue helping with the rest of their request.",
+                    content: `Image generation failed (${reason}). Briefly let the user know the image could not be created right now and continue helping with the rest of their request.`,
                   });
                 }
               } else {

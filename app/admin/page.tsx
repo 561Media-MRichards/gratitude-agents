@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
+import AppShell from "@/components/AppShell";
 
 interface User {
   id: string;
@@ -142,62 +141,49 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
-        <p className="text-white/40">Loading...</p>
-      </div>
+      <AppShell title="Admin" maxWidth="max-w-4xl">
+        <div className="flex items-center justify-center h-64">
+          <div className="w-5 h-5 border-2 border-white/[0.1] border-t-white/60 rounded-full animate-spin" />
+        </div>
+      </AppShell>
     );
   }
 
   if (!session || session.user.role !== "admin") return null;
 
   return (
-    <div className="min-h-screen bg-dark-950 px-6 py-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Image
-              src="/gratitude-white.svg"
-              alt="Gratitude"
-              width={110}
-              height={22}
-            />
-            <span className="text-[10px] font-semibold tracking-[0.15em] uppercase text-white/30">
-              Admin
-            </span>
-          </div>
-          <Link
-            href="/chat"
-            className="text-[13px] text-white/40 hover:text-white/70 transition-colors"
-          >
-            Back to chat
-          </Link>
-        </div>
-
-        {/* Title */}
-        <div className="flex items-center justify-between mb-6">
+    <AppShell title="Admin" maxWidth="max-w-4xl">
+      <div>
+        {/* Page title */}
+        <div className="flex items-end justify-between mb-8">
           <div>
-            <h1 className="text-xl font-semibold text-white/90">Users</h1>
-            <p className="text-[13px] text-white/40 mt-1">
-              {users.length} user{users.length !== 1 ? "s" : ""} total
+            <h1 className="font-display uppercase text-[26px] sm:text-[30px] leading-[1.05] tracking-[-0.01em] text-white mb-2">
+              Admin
+            </h1>
+            <p className="text-[14px] text-white/45">
+              {users.length} user{users.length !== 1 ? "s" : ""} in the workspace
             </p>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 rounded-xl text-[13px] font-medium text-white/80 transition-all hover:bg-white/[0.08]"
-            style={{
-              background: showForm ? "rgba(255,255,255,0.06)" : "rgba(254, 49, 132, 0.15)",
-              border: showForm
-                ? "1px solid rgba(255,255,255,0.1)"
-                : "1px solid rgba(254, 49, 132, 0.3)",
-            }}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+              showForm
+                ? "text-white/60 bg-white/[0.04] border border-white/[0.1] hover:bg-white/[0.07]"
+                : "text-white/80 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] hover:border-white/[0.14] hover:text-white"
+            }`}
           >
-            {showForm ? "Cancel" : "+ Add user"}
+            {!showForm && (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14" />
+                <path d="M5 12h14" />
+              </svg>
+            )}
+            {showForm ? "Cancel" : "Add user"}
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-[13px] text-red-400">
+          <div className="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-[13px] text-red-400">
             {error}
           </div>
         )}
@@ -206,11 +192,11 @@ export default function AdminPage() {
         {showForm && (
           <form
             onSubmit={handleCreate}
-            className="mb-6 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.02]"
+            className="mb-6 p-5 rounded-xl border border-white/[0.06] bg-white/[0.02]"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-white/30 mb-1.5">
+                <label className="block text-[12px] font-medium text-white/50 mb-1.5">
                   Name
                 </label>
                 <input
@@ -218,11 +204,11 @@ export default function AdminPage() {
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="Full name"
                   required
-                  className="w-full px-3 py-2.5 rounded-lg text-[13px] text-white/80 placeholder:text-white/20 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-white/[0.15]"
+                  className="w-full px-3.5 py-2.5 rounded-lg text-[13px] text-white/85 placeholder:text-white/25 bg-white/[0.03] border border-white/[0.06] focus:outline-none focus:border-white/[0.14] transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-white/30 mb-1.5">
+                <label className="block text-[12px] font-medium text-white/50 mb-1.5">
                   Email
                 </label>
                 <input
@@ -231,11 +217,11 @@ export default function AdminPage() {
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="user@example.com"
                   required
-                  className="w-full px-3 py-2.5 rounded-lg text-[13px] text-white/80 placeholder:text-white/20 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-white/[0.15]"
+                  className="w-full px-3.5 py-2.5 rounded-lg text-[13px] text-white/85 placeholder:text-white/25 bg-white/[0.03] border border-white/[0.06] focus:outline-none focus:border-white/[0.14] transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-white/30 mb-1.5">
+                <label className="block text-[12px] font-medium text-white/50 mb-1.5">
                   Password
                 </label>
                 <input
@@ -244,17 +230,17 @@ export default function AdminPage() {
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Set a password"
                   required
-                  className="w-full px-3 py-2.5 rounded-lg text-[13px] text-white/80 placeholder:text-white/20 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-white/[0.15]"
+                  className="w-full px-3.5 py-2.5 rounded-lg text-[13px] text-white/85 placeholder:text-white/25 bg-white/[0.03] border border-white/[0.06] focus:outline-none focus:border-white/[0.14] transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-white/30 mb-1.5">
+                <label className="block text-[12px] font-medium text-white/50 mb-1.5">
                   Role
                 </label>
                 <select
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value as User["role"])}
-                  className="w-full px-3 py-2.5 rounded-lg text-[13px] text-white/80 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-white/[0.15]"
+                  className="w-full px-3.5 py-2.5 rounded-lg text-[13px] text-white/85 bg-white/[0.03] border border-white/[0.06] focus:outline-none focus:border-white/[0.14] transition-colors"
                 >
                   {ROLES.map((r) => (
                     <option key={r} value={r} className="bg-dark-900 text-white">
@@ -267,9 +253,10 @@ export default function AdminPage() {
             <button
               type="submit"
               disabled={saving || !newName || !newEmail || !newPassword}
-              className="px-5 py-2.5 rounded-xl text-[13px] font-medium text-white disabled:opacity-40 transition-all"
+              className="px-5 py-2.5 rounded-full text-[13px] font-semibold text-white disabled:opacity-40 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
               style={{
                 background: "linear-gradient(135deg, #FE3184 0%, #FF6B35 50%, #ec7211 100%)",
+                boxShadow: "0 4px 20px rgba(254, 49, 132, 0.2)",
               }}
             >
               {saving ? "Creating..." : "Create user"}
@@ -278,7 +265,7 @@ export default function AdminPage() {
         )}
 
         {/* Users table */}
-        <div className="rounded-2xl border border-white/[0.08] overflow-hidden">
+        <div className="rounded-xl border border-white/[0.06] overflow-hidden bg-white/[0.01]">
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/[0.06]">
@@ -385,6 +372,6 @@ export default function AdminPage() {
           </table>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }
