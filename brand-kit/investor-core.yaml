@@ -15,6 +15,7 @@ round:
   stage: "Friends & Family"
   year: 2026
   amount: "$3-5M"
+  status: "ACTIVE - in market as of 2026-07-20; approximately 5 investors interested (per founder); investment documents being assembled. Do not state committed amounts."
   use_of_funds:
     - { category: "Product & Engineering", pct: 60 }
     - { category: "Growth & Partnerships", pct: 20 }
