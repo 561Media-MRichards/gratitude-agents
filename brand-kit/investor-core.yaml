@@ -1,0 +1,91 @@
+# Gratitude.com - Investor Core (single source of truth)
+# Extracted 2026-07-20 from the founder-approved investor deck
+# ("GRATITUDE INVESTOR DECK", 2026 Friends & Family round).
+# RULE: agents may use ONLY the facts below in investor-facing materials.
+# Any number or claim not listed here is [NEEDS INPUT] - never invented.
+
+chunk_id: "investor-core"
+domain: "investor_relations"
+status: "active"
+version: "1.0"
+source: "2026 Friends & Family investor deck (Michael Hilf approved)"
+
+round:
+  type: "SAFE"
+  stage: "Friends & Family"
+  year: 2026
+  amount: "$3-5M"
+  use_of_funds:
+    - { category: "Product & Engineering", pct: 60 }
+    - { category: "Growth & Partnerships", pct: 20 }
+    - { category: "Operations", pct: 10 }
+    - { category: "Partner Network", pct: 10 }
+
+structure:
+  commercial_entity:
+    name: "Gratitude.com"
+    form: "Public Benefit Corporation"
+    role: "Builds the platform: technology, enterprise customers, consumer experience, revenue, scale"
+  philanthropic_entity:
+    name: "ActivateGratitude.org"
+    form: "501(c)(3) Public Charity"
+    role: "Activates the impact: receives donations, funds nonprofit partners, delivers verified acts, expands community impact"
+  framing: "One creates enterprise value. The other creates public trust. Enterprise funds growth; philanthropy funds impact."
+
+founder:
+  name: "Michael Hilf"
+  title: "Founder & CEO"
+  email: "mhilf@gratitude.com"
+
+positioning:
+  category: "Human Acknowledgment"
+  one_liner: "A shared behavioral infrastructure that turns human gratitude into real-world impact."
+  category_claim: "First platform turning gratitude into measurable impact. Not competing in an existing market - defining a new one."
+  ai_angle: "Gratitude.com is the behavioral infrastructure for the age of AI. AI will reshape how we work. Gratitude.com will reshape how we connect."
+  flywheel: "Every message builds the network: a message is sent, impact is activated, people multiply, the network grows."
+
+flagship_mechanic:
+  name: "Tell Them."
+  steps:
+    - "Express: send a message to someone who changed your life"
+    - "Activate: a pre-funded act of real-world impact triggers instantly through trusted nonprofit partners"
+    - "Multiply: the recipient experiences both and is inspired to Tell Them"
+  tagline: "Every message changes two lives."
+
+participation_modes:
+  - "Express - tell someone (the behavior that starts everything)"
+  - "Activate - trigger today's act (no message required)"
+  - "Fund - sponsor additional acts for individuals, organizations, or communities"
+  - "Facilitate (next generation) - deliver acts yourself"
+
+market_frames:
+  wellbeing_employee_engagement: "$600B+ (budgets already exist)"
+  social_impact_philanthropy: "$500B+ (connecting existing capital, not creating a new market)"
+  expansion_path: "Individuals -> Organizations -> Communities -> Institutions (schools, healthcare, cities, governments)"
+
+problem_stats:
+  - "53% of people have never fully told the most important person in their life how they feel"
+  - "82% of employees say recognition matters, yet most go years without one meaningful acknowledgment"
+
+roadmap_24_months:
+  launch:
+    window: "60-90 days"
+    milestones: ["MVP live", "First enterprise customers", "First nonprofit partners"]
+  validate:
+    window: "Months 1-6"
+    milestones: ["Thousands of verified activations", "Demonstrated enterprise value", "Proven repeatable model"]
+  scale:
+    window: "18-24 months"
+    milestones: ["Millions of participants", "Global nonprofit ecosystem", "Category leadership"]
+  framing: "This round proves the model. The next scales it."
+
+voice_for_investors:
+  tone: "Credibility and numbers. Confident, declarative, zero hype-qualifiers. Distinct from activation-energy marketing voice."
+  spelling: "US English - 'acknowledgment'"
+  banned: ["em dashes", "invented metrics", "valuation claims", "revenue projections not listed here"]
+
+not_yet_available:  # [NEEDS INPUT] from Michael Hilf before use
+  - "Valuation / SAFE cap and discount"
+  - "Current traction numbers (users, activations, pilots)"
+  - "Team beyond founder"
+  - "Committed capital to date"
